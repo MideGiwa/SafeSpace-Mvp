@@ -1,0 +1,126 @@
+.postCard {
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.publicCard {
+  border-left: 8px solid var(--primary);
+}
+
+.anonCard {
+  border-left: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.authorInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background-color: var(--surface-container);
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarAnon {
+  background-color: var(--surface-container-highest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--on-surface-variant);
+}
+
+.authorName {
+  font-weight: 700;
+  color: var(--on-surface);
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+  font-family: var(--font-headline);
+}
+
+.anonymousName {
+  font-style: italic;
+}
+
+.metaData {
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+}
+
+.tag {
+  background-color: var(--tertiary-container);
+  color: var(--tertiary);
+  padding: 0.375rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+}
+
+.content {
+  font-size: 1.25rem;
+  color: var(--on-surface-variant);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.italicContent {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--on-surface);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.actionBtn:hover {
+  color: var(--primary);
+}
+
+.actionBtn.hugged {
+  color: var(--tertiary); /* Accent pulse */
+}
+
+.actionCount {
+  font-weight: 700;
+  font-size: 1rem;
+  font-family: var(--font-body);
+}
+
+.actionBtn:hover .actionCount {
+  color: inherit;
+}

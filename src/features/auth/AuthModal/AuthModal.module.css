@@ -1,0 +1,33 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.submitBtn {
+  margin-top: 1rem;
+}
+
+.toggleText {
+  margin-top: 2rem;
+  text-align: center;
+  font-family: var(--font-body);
+  color: var(--on-surface-variant);
+  font-size: 0.875rem;
+}
+
+.toggleBtn {
+  background: transparent;
+  border: none;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  color: var(--primary);
+  cursor: pointer;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.toggleBtn:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,22 @@
+.pageHeader {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-family: var(--font-headline);
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: var(--on-surface);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: var(--on-surface-variant);
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+}

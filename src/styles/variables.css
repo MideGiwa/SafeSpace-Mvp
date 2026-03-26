@@ -1,0 +1,65 @@
+/* src/styles/variables.css */
+:root {
+  /* Kindred Harbor Design System */
+  
+  /* Backgrounds & Surfaces */
+  --surface: #f9f9fe;
+  --surface-bright: #f9f9fe;
+  --surface-dim: #d9dade;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f3f3f8;
+  --surface-container: #ededf2;
+  --surface-container-high: #e8e8ed;
+  --surface-container-highest: #e2e2e7;
+  
+  /* Primary (Anchor Blue) */
+  --primary: #004199;
+  --primary-container: #1058c3;
+  --on-primary: #ffffff;
+  --on-primary-container: #c8d7ff;
+  --primary-fixed: #d9e2ff;
+  --primary-fixed-dim: #b0c6ff;
+  --surface-tint: #1259c4;
+  
+  /* Secondary */
+  --secondary: #4c5e88;
+  --secondary-container: #bccefe;
+  --on-secondary: #ffffff;
+  --on-secondary-container: #465781;
+  --secondary-fixed: #d9e2ff;
+  
+  /* Tertiary (Empathy Pulse) */
+  --tertiary: #7e1a66;
+  --tertiary-container: #9b357f;
+  --on-tertiary: #ffffff;
+  --on-tertiary-container: #ffc7e7;
+  --tertiary-fixed: #ffd8ed;
+  
+  /* Text & Outlines */
+  --on-surface: #1a1c1f;
+  --on-surface-variant: #424653;
+  --outline: #737784;
+  --outline-variant: #c3c6d5;
+  
+  /* Error */
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  
+  /* Typography */
+  --font-headline: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  
+  /* Radius & Shadows */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 3rem;
+  --radius-full: 9999px;
+  
+  --shadow-ambient: 0px 20px 40px rgba(0, 65, 153, 0.08);
+  --shadow-sm: 0px 4px 12px rgba(0, 65, 153, 0.05);
+
+  /* Transitions */
+  --transition-elastic: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-ease: all 0.3s ease;
+}

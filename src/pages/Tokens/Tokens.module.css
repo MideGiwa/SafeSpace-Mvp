@@ -1,0 +1,209 @@
+.packageNote { font-size: 0.75rem; color: var(--on-surface-variant); margin-bottom: 0.5rem; }
+
+.page {
+  padding: 2rem;
+  max-width: 860px;
+  margin: 0 auto;
+}
+@media (max-width: 600px) { .page { padding: 1rem; } }
+
+.pageHeader {
+  margin-bottom: 2rem;
+}
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--on-surface);
+  margin-bottom: 0.25rem;
+}
+.subtitle {
+  color: var(--on-surface-variant);
+  font-size: 0.9rem;
+}
+
+/* Balance Card */
+.balanceCard {
+  background: var(--primary);
+  color: white;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  box-shadow: 0 12px 30px rgba(16,88,195,0.25);
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.balanceLabel {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+  margin-bottom: 0.75rem;
+}
+.balanceAmount {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.balanceAmount .material-symbols-outlined {
+  font-size: 2.5rem;
+  opacity: 0.9;
+}
+.balanceNum {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.balanceSuffix {
+  font-size: 1.25rem;
+  opacity: 0.8;
+  align-self: flex-end;
+  padding-bottom: 0.4rem;
+}
+.balanceNote {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.balanceRight {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.addBtn, .historyBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.addBtn { background: white; color: var(--primary); border: none; }
+.historyBtn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); }
+.addBtn:hover, .historyBtn:hover { opacity: 0.9; }
+
+
+/* How It Works */
+.howItWorks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+@media (max-width: 700px) { .howItWorks { grid-template-columns: 1fr; } }
+
+.howCard {
+  background: var(--surface-container-low);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.howCard .material-symbols-outlined {
+  font-size: 1.75rem;
+  color: var(--primary);
+  margin-bottom: 0.25rem;
+}
+.howCard h4 { font-weight: 700; font-size: 0.9rem; }
+.howCard p { font-size: 0.8rem; color: var(--on-surface-variant); line-height: 1.5; }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid var(--outline-variant);
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+.tab, .tabActive {
+  background: none; border: none; padding: 0.75rem 0; font-weight: 700; font-size: 0.95rem; cursor: pointer; position: relative; transition: color 0.2s;
+}
+.tab { color: var(--on-surface-variant); }
+.tabActive { color: var(--primary); }
+.tabActive::after {
+  content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--primary); border-radius: 2px 2px 0 0;
+}
+
+/* Transaction List */
+.transactionList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.txRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--surface-container-lowest);
+  border-radius: 1rem;
+  border: 1px solid rgba(0,0,0,0.03);
+  transition: background 0.2s;
+}
+.txRow:hover { background: var(--surface-container-low); }
+.txIcon {
+  width: 2.5rem; height: 2.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.txIconCredit { background: rgba(16,88,195,0.1); color: var(--primary); }
+.txIconDebit { background: rgba(0,0,0,0.05); color: var(--on-surface-variant); }
+.txInfo { flex: 1; }
+.txLabel { font-weight: 600; font-size: 0.875rem; color: var(--on-surface); }
+.txDate { font-size: 0.75rem; color: var(--on-surface-variant); margin-top: 0.2rem; }
+.txAmount { font-weight: 700; font-size: 0.95rem; white-space: nowrap; }
+.credit { color: var(--primary); }
+.debit { color: var(--on-surface-variant); }
+
+/* Fund Section */
+.fundSubtitle { color: var(--on-surface-variant); margin-bottom: 1.5rem; }
+.packages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+@media (max-width: 600px) { .packages { grid-template-columns: 1fr; } }
+
+.package {
+  background: var(--surface-container-lowest);
+  border: 2px solid var(--outline-variant);
+  border-radius: 1.25rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+.package:hover { border-color: var(--primary); }
+.packageSelected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(16,88,195,0.1);
+}
+.packageTag {
+  position: absolute; top: -0.7rem; left: 50%; transform: translateX(-50%);
+  background: var(--primary); color: white; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.08em; padding: 0.2rem 0.75rem; border-radius: 999px;
+}
+.packageTokens {
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 2rem; font-weight: 800; color: var(--on-surface); margin-bottom: 0.5rem;
+}
+.packageTokens .material-symbols-outlined { color: var(--primary); }
+.packageLabel { font-size: 0.85rem; font-weight: 600; color: var(--on-surface-variant); margin-bottom: 0.75rem; }
+.packagePrice { font-size: 1.5rem; font-weight: 800; color: var(--on-surface); }
+
+.payLabel { font-weight: 700; margin-bottom: 1rem; }
+.payMethods { margin-bottom: 1.5rem; }
+.payMethod {
+  display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem;
+  background: var(--surface-container-low); border-radius: 0.75rem; border: 1px solid var(--outline-variant);
+  font-size: 0.875rem; font-weight: 600;
+}
+.payBtn {
+  width: 100%; background: var(--primary); color: white; border: none; border-radius: var(--radius-full); padding: 1rem; font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; margin-bottom: 1rem; transition: background 0.2s;
+}
+.payBtn:hover { background: var(--on-primary-fixed-variant); }
+.payNote { text-align: center; font-size: 0.8rem; color: var(--on-surface-variant); }

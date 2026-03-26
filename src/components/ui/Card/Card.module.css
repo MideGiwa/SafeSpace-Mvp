@@ -1,0 +1,20 @@
+.card {
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  font-family: var(--font-body);
+  transition: var(--transition-ease);
+}
+
+.elevated {
+  background-color: var(--surface-container-lowest);
+  box-shadow: var(--shadow-sm);
+}
+
+.flat {
+  background-color: var(--surface-container-low);
+}
+
+.outline {
+  background-color: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+}
