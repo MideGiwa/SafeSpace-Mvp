@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Modal } from '../../../components/ui/Modal/Modal';
 import { Button } from '../../../components/ui/Button/Button';
 import { Input } from '../../../components/ui/Input/Input';
-import { useAuthStore } from '../../../stores/useAuthStore';
 import styles from './AuthModal.module.css';
 
 interface AuthModalProps {
@@ -14,13 +13,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const login = useAuthStore(state => state.login);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login logic
     if (email && password) {
-      login('seeker'); // default mock role
+      console.log('AuthModal submitted:', email);
       onClose();
     }
   };

@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Modal.module.css';
 

@@ -158,16 +158,18 @@ export const Profile: React.FC = () => {
                   <p>Your identity has been confirmed. You now have full access to all features.</p>
                 </div>
               </div>
-            ) : currentKycStatus === 'PENDING' ? (
-              <div className={styles.statusCardPending}>
-                <span className="material-symbols-outlined">hourglass_empty</span>
-                <div>
-                  <h4>Verification Pending</h4>
-                  <p>We're currently reviewing your details. This usually takes 24-48 hours.</p>
-                </div>
-              </div>
             ) : (
               <div className={styles.verifyFlow}>
+                {currentKycStatus === 'PENDING' && (
+                  <div className={styles.statusCardPending} style={{ marginBottom: '2rem' }}>
+                    <span className="material-symbols-outlined">hourglass_empty</span>
+                    <div>
+                      <h4>Verification Under Review</h4>
+                      <p>We're currently reviewing your details. You can update your submission below if needed.</p>
+                    </div>
+                  </div>
+                )}
+
                 {!isNamesComplete && (
                   <div className={styles.warningBox}>
                     <span className="material-symbols-outlined">error</span>
@@ -193,7 +195,7 @@ export const Profile: React.FC = () => {
                     value={vValue}
                     onChange={e => setVValue(e.target.value.replace(/\D/g, '').slice(0, 11))}
                     placeholder="Enter 11 digits"
-                    disabled={!isNamesComplete}
+                    disabled={!isNamesComplete || isVerifying}
                   />
                   <small>Your security is our priority. This data is encrypted and discarded after verification.</small>
                 </div>
@@ -203,7 +205,7 @@ export const Profile: React.FC = () => {
                   disabled={!isNamesComplete || vValue.length < 11 || isVerifying}
                   onClick={() => startKyc()}
                 >
-                  {isVerifying ? 'Verifying...' : 'Submit for Review'}
+                  {isVerifying ? 'Verifying...' : (currentKycStatus === 'PENDING' ? 'Update Submission' : 'Submit for Review')}
                 </button>
               </div>
             )}
