@@ -38,6 +38,7 @@
 
 .primary:hover:not(:disabled) {
   background-color: var(--primary-container);
+  color: var(--on-primary-container);
   box-shadow: var(--shadow-ambient);
 }
 
@@ -48,6 +49,7 @@
 
 .secondary:hover {
   background-color: var(--secondary-fixed-dim);
+  color: var(--on-secondary-container);
 }
 
 .tertiary {
@@ -57,5 +59,6 @@
 }
 
 .tertiary:hover {
-  background-color: rgba(155, 53, 127, 0.1); /* tertiary-container */
+  background-color: rgba(155, 53, 127, 0.1);
+  color: var(--tertiary);
 }

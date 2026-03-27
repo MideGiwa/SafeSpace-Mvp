@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { kycService } from '../../services/kycService';
 import styles from './KYC.module.css';
 
 type Step = 'intro' | 'verifying' | 'success';
@@ -10,19 +11,23 @@ export const KYC: React.FC = () => {
   const [idType, setIdType] = useState<'bvn' | 'nin'>('bvn');
   const [idNumber, setIdNumber] = useState('');
 
-  // Auto-advance from verifying to success
-  useEffect(() => {
-    if (currentStep === 'verifying') {
-      const timer = setTimeout(() => {
-        setCurrentStep('success');
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentStep]);
-
-  const handleVerify = () => {
+  const handleVerify = async () => {
     if (idNumber.length >= 10) {
       setCurrentStep('verifying');
+      try {
+        if (idType === 'bvn') {
+          await kycService.verifyBvn(idNumber);
+        } else {
+          await kycService.verifyNin(idNumber);
+        }
+        
+        // Give the user a nice transition effect
+        setTimeout(() => setCurrentStep('success'), 1500);
+      } catch (error: any) {
+        console.error("KYC Verification failed", error);
+        alert(error?.response?.data?.message || 'Verification failed. Please try again.');
+        setCurrentStep('intro');
+      }
     } else {
       alert('Please enter a valid ID number');
     }

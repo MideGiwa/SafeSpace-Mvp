@@ -1,29 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { authService } from '../../services/authService';
 import styles from './Auth.module.css';
 
 export const Auth: React.FC = () => {
   const [isSignUp, setIsSignUp] = useState(false);
-  const [role, setRole] = useState<'seeker' | 'professional'>('seeker');
+  const [role, setRole] = useState<'REGULAR' | 'PROFESSIONAL'>('REGULAR');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorInfo, setErrorInfo] = useState<string | null>(null);
+  
+  // Form Fields
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [pseudonym, setPseudonym] = useState('');
+
   const navigate = useNavigate();
   const location = useLocation();
-  const login = useAuthStore(state => state.login);
+  const loginAction = useAuthStore(state => state.login);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const roleParam = params.get('role');
     if (roleParam === 'professional' || roleParam === 'seeker') {
-      setRole(roleParam);
+      setRole(roleParam === 'professional' ? 'PROFESSIONAL' : 'REGULAR');
       setIsSignUp(true);
     }
   }, [location]);
 
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(role);
-    // If professional, go to pro-dashboard, else go to onboarding
-    navigate(role === 'professional' ? '/pro-dashboard' : '/onboarding');
+    setIsLoading(true);
+    setErrorInfo(null);
+
+    try {
+      let authResponse;
+      if (isSignUp) {
+        authResponse = await authService.register({
+          email,
+          password,
+          pseudonym,
+          role,
+          kycStatus: 'PENDING',
+          isBanned: false,
+          dmOptIn: true
+        });
+      } else {
+        authResponse = await authService.login({ email, password });
+      }
+
+      loginAction(authResponse.user, authResponse.access_token, authResponse.refresh_token);
+      
+      // If professional, go to pro-dashboard, else go to onboarding
+      const navTarget = (authResponse.user.role === 'PROFESSIONAL') ? '/pro-dashboard' : '/onboarding';
+      navigate(navTarget);
+      
+    } catch (err: any) {
+      setErrorInfo(err.response?.data?.message || 'Authentication failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -79,12 +115,14 @@ export const Auth: React.FC = () => {
             <button 
               className={!isSignUp ? styles.toggleActive : styles.toggleInactive} 
               onClick={() => setIsSignUp(false)}
+              type="button"
             >
               Sign In
             </button>
             <button 
               className={isSignUp ? styles.toggleActive : styles.toggleInactive} 
               onClick={() => setIsSignUp(true)}
+              type="button"
             >
               Sign Up
             </button>
@@ -98,36 +136,49 @@ export const Auth: React.FC = () => {
               ? 'Join our supportive community today.' 
               : 'Enter your credentials to access your sanctuary.'}
           </p>
+          
+          {errorInfo && <div style={{ color: '#d32f2f', marginBottom: '1rem', padding: '0.8rem', backgroundColor: '#ffebe9', borderRadius: '4px', fontSize: '14px' }}>{errorInfo}</div>}
 
           <form className={styles.authForm} onSubmit={handleAuth}>
             
             {isSignUp && (
-              <div className={styles.roleSelection}>
-                <p className={styles.inputLabel}>I am joining as a:</p>
-                <div className={styles.roleButtons}>
-                  <button 
-                    type="button" 
-                    className={role === 'seeker' ? styles.roleBtnActive : styles.roleBtn}
-                    onClick={() => setRole('seeker')}
-                  >
-                    <span className="material-symbols-outlined">person</span> Seeker
-                  </button>
-                  <button 
-                    type="button" 
-                    className={role === 'professional' ? styles.roleBtnActive : styles.roleBtn}
-                    onClick={() => setRole('professional')}
-                  >
-                    <span className="material-symbols-outlined">medical_services</span> Professional
-                  </button>
+              <>
+                <div className={styles.roleSelection}>
+                  <p className={styles.inputLabel}>I am joining as a:</p>
+                  <div className={styles.roleButtons}>
+                    <button 
+                      type="button" 
+                      className={role === 'REGULAR' ? styles.roleBtnActive : styles.roleBtn}
+                      onClick={() => setRole('REGULAR')}
+                    >
+                      <span className="material-symbols-outlined">person</span> Seeker
+                    </button>
+                    <button 
+                      type="button" 
+                      className={role === 'PROFESSIONAL' ? styles.roleBtnActive : styles.roleBtn}
+                      onClick={() => setRole('PROFESSIONAL')}
+                    >
+                      <span className="material-symbols-outlined">medical_services</span> Professional
+                    </button>
+                  </div>
                 </div>
-              </div>
+
+
+                <div className={styles.inputGroup}>
+                  <label>Pseudonym (Public Name)</label>
+                  <div className={styles.inputWrap}>
+                    <span className="material-symbols-outlined">face</span>
+                    <input type="text" placeholder="CoolUser" value={pseudonym} onChange={e => setPseudonym(e.target.value)} required />
+                  </div>
+                </div>
+              </>
             )}
 
             <div className={styles.inputGroup}>
               <label>Email Address</label>
               <div className={styles.inputWrap}>
                 <span className="material-symbols-outlined">mail</span>
-                <input type="email" placeholder="hello@example.com" required />
+                <input type="email" placeholder="hello@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
               </div>
             </div>
 
@@ -135,19 +186,19 @@ export const Auth: React.FC = () => {
               <label>Password</label>
               <div className={styles.inputWrap}>
                 <span className="material-symbols-outlined">lock</span>
-                <input type="password" placeholder="••••••••" required />
+                <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
               </div>
             </div>
 
             {!isSignUp && (
               <div className={styles.forgotPassword}>
-                <a href="#">Forgot password?</a>
+                <a href="#forgot">Forgot password?</a>
               </div>
             )}
 
-            <button type="submit" className={styles.submitBtn}>
-              {isSignUp ? 'Create Account' : 'Sign In securely'}
-              <span className="material-symbols-outlined">arrow_forward</span>
+            <button type="submit" className={styles.submitBtn} disabled={isLoading}>
+              {isLoading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In securely')}
+              <span className="material-symbols-outlined" style={{ display: isLoading ? 'none' : 'inline-block' }}>arrow_forward</span>
             </button>
           </form>
 

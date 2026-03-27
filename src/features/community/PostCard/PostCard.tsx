@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../../../components/ui/Card/Card';
+import { communityService } from '../../../services/communityService';
 import styles from './PostCard.module.css';
 
 interface PostCardProps {
+  id: string;
   authorName: string;
   authorImage?: string;
   timeAgo: string;
@@ -16,6 +18,7 @@ interface PostCardProps {
 }
 
 export const PostCard: React.FC<PostCardProps> = ({
+  id,
   authorName,
   authorImage,
   timeAgo,
@@ -29,10 +32,17 @@ export const PostCard: React.FC<PostCardProps> = ({
   const [hugs, setHugs] = useState(initialHugs);
   const [hasHugged, setHasHugged] = useState(false);
 
-  const handleHug = () => {
+  const handleHug = async () => {
     if (!hasHugged) {
       setHugs(prev => prev + 1);
       setHasHugged(true);
+      try {
+        await communityService.supportPost(id);
+      } catch (err) {
+        console.error("Failed to hug post", err);
+        setHugs(prev => prev - 1);
+        setHasHugged(false);
+      }
     }
   };
 
