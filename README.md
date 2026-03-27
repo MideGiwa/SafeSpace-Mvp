@@ -1,73 +1,113 @@
-# React + TypeScript + Vite
+# SafeSpace
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**SafeSpace** is a , cushioned digital community designed for mental wellness, community support, and professional clinical care. Built for the modern age, it bridges the gap between peer-led empathy and professional expertise in a secure, role-aware environment.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Quick Start & Credentials
 
-## React Compiler
+To experience the full capability of SafeSpace, we recommend testing with **two distinct roles**.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### **1. Professional Dashboard (Therapists/Specialists)**
 
-## Expanding the ESLint configuration
+* **Access**: Sign up as a "Professional" or login with a verified specialist account.
+* **Key Features**:
+  * **Clinical Management**: Custom dashboard to accept/decline session requests.
+  * **Group Leadership**: Create and manage "Professional Sanctuaries" (Specialized groups).
+  * **Availability**: Set practice hours and manage client bookings via a specialized calendar.
+* **Sign Up as Professional**.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### **2. Member Experience (Seekers)**
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+* **Access**: Sign up as a "Seeker".
+* **Key Features**:
+  * **Discovery**: Browse and join community sanctuaries or professional-led groups.
+  * **Booking**: Request 1-on-1 sessions with vetted specialists.
+  * **KYC Verification**: Level-up your trust score using the NIN/BVN verification flow.
+* **Test Account**: **Sign Up as Seeker**.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## ✨ Key Features
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 🛡️ Role-Based Access Control (RBAC)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+* **Dynamic UI**: The interface morphs based on your role. Professionals see management tools (availability, client requests), while Regular users see discovery and booking journeys.
+* **Route Protection**: Secure guards ensure clinical tools are only accessible to verified specialists.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 📅 Specialist Appointments
+
+* **Themed Calendar**: A premium, custom-styled calendar integration for managing wellness sessions.
+* **Session Workflow**: Full lifecycle support from "Pending Request" to "Accepted" and "Completed" sessions.
+
+### 🏛️ Sanctuaries (Groups)
+
+* **Professional Groups**: Specialized clinical groups led by experts.
+* **Community Groups**: Peer-to-peer support spaces for shared experiences.
+* **Creation Flow**: Professionals can establish new sanctuaries with specific clinical focuses.
+
+### 🆔 Identity Verification (KYC)
+
+* **Tiered Trust**: Verification flow supporting NIN and BVN to ensure a safe, vetted specialists.
+
+---
+
+## 🛠️ Technical Stack
+
+### **Frontend**
+
+* **Framework**: React 19 + Vite + TypeScript
+* **State Management**: Zustand (Auth & Global State)
+* **Data Fetching**: TanStack React Query (Server state synchronization)
+* **Styling**: Vanilla CSS with the **Kindred Harbor Design System** (Tokens for glassmorphism, depth, and typography).
+* **Animations**: Framer Motion for smooth micro-interactions.
+
+### **Backend**
+
+* **Framework**: NestJS (Node.js)
+* **Database**: PostgreSQL
+* **ORM**: Prisma
+* **Authentication**: JWT (Access & Refresh tokens) with Passport.js
+* **Deployment**: Hosted on **Render** (API) and **Vercel** (Frontend).
+
+---
+
+## 📦 Installation & Setup
+
+### **Prerequisites**
+
+* Node.js (v20+)
+* pnpm or npm
+
+### **Frontend Setup**
+
+1. Navigate to `SafeSpace_Frontend`:
+   ```bash
+   cd SafeSpace_Frontend
+   pnpm install
+   pnpm run dev
+   ```
+2. Configure `.env`:
+   ```env
+   VITE_API_BASE_URL=https://safespace-temp.onrender.com/api/
+   ```
+
+### **Backend Setup**
+
+1. Navigate to `SafeSpace_Backend`:
+   ```bash
+   cd SafeSpace_Backend
+   npm install
+   npm run start:dev
+   ```
+
+---
+
+## 🔗 Repository Links
+
+* **Main Repository**: Sudosquad/SafeSpace
+* **Live Preview**: https://safe-space-mvp.vercel.app/
+
+---
+
+Developed with 💜 for the SafeSpace.
