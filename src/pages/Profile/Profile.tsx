@@ -82,12 +82,14 @@ export const Profile: React.FC = () => {
           >
             <span className="material-symbols-outlined">badge</span> Personal Info
           </button>
-          <button 
-            className={`${styles.navItem} ${activeTab === 'verify' ? styles.navActive : ''}`}
-            onClick={() => setActiveTab('verify')}
-          >
-            <span className="material-symbols-outlined">verified_user</span> Verification
-          </button>
+          {storeUser?.role !== 'REGULAR' && (
+            <button 
+              className={`${styles.navItem} ${activeTab === 'verify' ? styles.navActive : ''}`}
+              onClick={() => setActiveTab('verify')}
+            >
+              <span className="material-symbols-outlined">verified_user</span> Verification
+            </button>
+          )}
           <button 
             className={`${styles.navItem} ${activeTab === 'privacy' ? styles.navActive : ''}`}
             onClick={() => setActiveTab('privacy')}
@@ -143,7 +145,7 @@ export const Profile: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'verify' && (
+        {activeTab === 'verify' && storeUser?.role !== 'REGULAR' && (
           <div className={styles.viewPanel}>
             <header className={styles.panelHeader}>
               <h2>Identity Verification</h2>
