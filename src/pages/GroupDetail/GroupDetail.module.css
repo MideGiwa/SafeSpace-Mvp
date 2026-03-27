@@ -1,0 +1,209 @@
+.page {
+  padding: 2rem;
+  max-width: 60rem;
+  margin: 0 auto;
+}
+
+.loading, .error {
+  padding: 4rem;
+  text-align: center;
+  color: var(--on-surface-variant);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.backBtn {
+  background: var(--surface-container-low);
+  border: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--on-surface);
+  transition: all 0.2s;
+}
+.backBtn:hover {
+  background: var(--surface-container-high);
+}
+
+.headerInfo h1 {
+  font-family: var(--font-headline);
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background-color: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--on-surface-variant);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 2rem;
+  border-bottom: 1px solid var(--outline-variant);
+  margin-bottom: 2rem;
+}
+
+.tab, .tabActive {
+  padding: 1rem 0.5rem;
+  background: none;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--on-surface-variant);
+  position: relative;
+}
+
+.tabActive {
+  color: var(--primary);
+}
+.tabActive::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 3px;
+  background-color: var(--primary);
+  border-radius: 3px 3px 0 0;
+}
+
+.sessionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.listHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.listHeader h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.createBtn {
+  background: none;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sessionCard {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.sessionInfo h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.time {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--on-surface-variant);
+  font-size: 0.8125rem;
+}
+.time span { font-size: 1rem; }
+
+.joinBtn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.statusBadge {
+  background-color: var(--surface-container-low);
+  color: var(--on-surface-variant);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 4rem;
+  background-color: var(--surface-container-low);
+  border-radius: 1.5rem;
+  color: var(--on-surface-variant);
+}
+.emptyState span {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.chatPlaceholder {
+  text-align: center;
+  padding: 6rem 2rem;
+  background: linear-gradient(135deg, var(--surface-container-low), white);
+  border-radius: 2rem;
+  border: 2px dashed var(--outline-variant);
+}
+
+.chatPlaceholder span {
+  font-size: 4rem;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+}
+
+.chatPlaceholder h2 {
+  font-family: var(--font-headline);
+  margin-bottom: 1rem;
+}
+
+.chatPlaceholder p {
+  color: var(--on-surface-variant);
+  max-width: 24rem;
+  margin: 0 auto;
+}

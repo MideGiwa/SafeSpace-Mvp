@@ -1,16 +1,31 @@
 import React, { useMemo } from 'react';
 import { Button } from '../../components/ui/Button/Button';
 import { professionals } from '../../data/professionals';
-import { groups } from '../../data/groups';
 import { upcomingSessions } from '../../data/sessions';
-import { posts } from '../../data/posts';
 import { useAuthStore } from '../../stores/useAuthStore';
 import styles from './Home.module.css';
 import { useNavigate } from 'react-router-dom';
 
+import { useQuery } from '@tanstack/react-query';
+import { communityService } from '../../services/communityService';
+import { groupService } from '../../services/groupService';
+
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuthStore();
+
+  // ─── Fetch real data ───────────────────────────────────────────
+  const { data: postsData } = useQuery({
+    queryKey: ['posts'],
+    queryFn: () => communityService.getPosts(1, 5),
+    enabled: isAuthenticated
+  });
+
+  const { data: groupsData } = useQuery({
+    queryKey: ['groups'],
+    queryFn: () => groupService.getGroups(),
+    enabled: isAuthenticated
+  });
 
   // Derive display name: prefer pseudonym, then firstName, fallback to "there"
   const displayName = useMemo(() => {
@@ -18,12 +33,8 @@ export const Home: React.FC = () => {
     return user.pseudonym || user.firstName || 'there';
   }, [user]);
 
-  // For now, we mock "joined groups" as empty if not verified, or just a mock array
-  // In a real app, this would come from a useQuery(['userGroups'])
-  const userGroups = useMemo(() => {
-    return user?.kycStatus === 'VERIFIED' ? groups.slice(0, 2) : [];
-  }, [user]);
-
+  const userGroups = groupsData || [];
+  const posts = postsData?.data || [];
   const hasGroups = userGroups.length > 0;
 
   return (
@@ -66,7 +77,7 @@ export const Home: React.FC = () => {
               <button className={styles.seeAllBtn} onClick={() => navigate('/sessions')}>View All</button>
             </div>
             <div className={styles.sessionsList}>
-              {upcomingSessions.slice(0, 2).map((session) => (
+              {(upcomingSessions as any[]).slice(0, 2).map((session: any) => (
                 <div key={session.id} className={styles.sessionCard} onClick={() => navigate('/call')}>
                   <div className={styles.sessionTime}>
                     <span className="material-symbols-outlined">schedule</span>
@@ -89,11 +100,11 @@ export const Home: React.FC = () => {
               <button className={styles.seeAllBtn} onClick={() => navigate('/community')}>Community</button>
             </div>
             <div className={styles.updatesList}>
-              {posts.slice(0, 2).map((post) => (
+              {(posts as any[]).slice(0, 3).map((post: any) => (
                 <div key={post.id} className={styles.updateCard} onClick={() => navigate('/community')}>
                   <div className={styles.updateHeader}>
-                    <span className={styles.updateGroup}>{post.groupName}</span>
-                    <span className={styles.updateTime}>{post.timestamp}</span>
+                    <span className={styles.updateGroup}>{post.authorName || 'Member'}</span>
+                    <span className={styles.updateTime}>{new Date(post.createdAt).toLocaleDateString()}</span>
                   </div>
                   <p className={styles.updateContent}>{post.content}</p>
                 </div>
@@ -137,7 +148,7 @@ export const Home: React.FC = () => {
             <button className={styles.seeAllBtn} onClick={() => navigate('/directory')}>See All</button>
           </div>
           <div className={styles.proScroller}>
-            {professionals.slice(0, 3).map(pro => (
+            {(professionals as any[]).slice(0, 3).map((pro: any) => (
               <div key={pro.id} className={styles.proCard}>
                 <div className={styles.proInfo}>
                   <div className={styles.proAvatar}>

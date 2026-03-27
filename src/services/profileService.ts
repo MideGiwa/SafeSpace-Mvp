@@ -10,15 +10,15 @@ export interface UpdateProfileDto {
 }
 
 export const profileService = {
-  /** GET /users/me – fetch the current user's full profile */
-  getProfile: async (): Promise<User> => {
-    const response = await api.get<User>('/users/me');
+  /** GET /users/{id} – fetch a user's full profile */
+  getProfile: async (id: string): Promise<User> => {
+    const response = await api.get<User>(`users/${id}`);
     return response.data;
   },
 
-  /** PATCH /users/me – update editable profile fields */
-  updateProfile: async (data: UpdateProfileDto): Promise<User> => {
-    const response = await api.patch<User>('/users/me', data);
+  /** PATCH /users/{id} – update editable profile fields */
+  updateProfile: async (id: string, data: UpdateProfileDto): Promise<User> => {
+    const response = await api.patch<User>(`users/${id}`, data);
     return response.data;
   },
 };

@@ -13,6 +13,7 @@ import { Auth } from './pages/Auth/Auth';
 import { Directory } from './pages/Directory/Directory';
 import { ProfessionalProfile } from './pages/ProfessionalProfile/ProfessionalProfile';
 import { Groups } from './pages/Groups/Groups';
+import { GroupDetail } from './pages/GroupDetail/GroupDetail';
 import { VoiceSession } from './pages/VoiceSession/VoiceSession';
 import { ProfessionalDashboard } from './pages/ProfessionalDashboard/ProfessionalDashboard';
 import { KYC } from './pages/KYC/KYC';
@@ -52,6 +53,7 @@ function App() {
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/community" element={<Community />} />
             <Route path="/groups" element={<Groups />} />
+            <Route path="/groups/:id" element={<GroupDetail />} />
             <Route path="/directory" element={<Directory />} />
             <Route path="/directory/:id" element={<ProfessionalProfile />} />
             <Route path="/pro-dashboard" element={<ProfessionalDashboard />} />

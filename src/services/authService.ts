@@ -22,21 +22,21 @@ export interface AuthResponse {
 
 export const authService = {
   login: async (credentials: any): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/login', credentials);
+    const response = await api.post<AuthResponse>('auth/login', credentials);
     return response.data;
   },
 
   register: async (data: any): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/register', data);
+    const response = await api.post<AuthResponse>('auth/register', data);
     return response.data;
   },
 
   refreshToken: async (refreshToken: string): Promise<string> => {
-    const response = await api.post<{ access_token: string }>('/auth/refresh', { refreshToken });
+    const response = await api.post<{ access_token: string }>('auth/refresh', { refreshToken });
     return response.data.access_token;
   },
 
   logout: async (refreshToken: string): Promise<void> => {
-    await api.post('/auth/logout', { refreshToken }).catch(() => {});
+    await api.post('auth/logout', { refreshToken }).catch(() => {});
   },
 };

@@ -17,6 +17,7 @@ interface PostCardProps {
   commentsCount: number;
   tag?: string;
   isAnonymous?: boolean;
+  authorId?: string;
 }
 
 export const PostCard: React.FC<PostCardProps> = ({
@@ -30,9 +31,12 @@ export const PostCard: React.FC<PostCardProps> = ({
   commentsCount,
   tag,
   isAnonymous = false,
+  authorId,
 }) => {
   const queryClient = useQueryClient();
-  const { isAnonymousMode } = useAuthStore();
+  const { user, isAnonymousMode } = useAuthStore();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState(content);
 
   const [hugs, setHugs] = useState(initialHugs);
   const [hasHugged, setHasHugged] = useState(false);
@@ -62,7 +66,26 @@ export const PostCard: React.FC<PostCardProps> = ({
     },
   });
 
-  // ─── Hug (support) ─────────────────────────────────────────────
+  // ─── Post Management (Edit/Delete) ─────────────
+  const { mutate: deletePost } = useMutation({
+    mutationFn: () => communityService.deletePost(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+    onError: (err) => console.error('Failed to delete post', err),
+  });
+
+  const { mutate: updatePost, isPending: updatingPost } = useMutation({
+    mutationFn: () => communityService.updatePost(id, { content: editedContent }),
+    onSuccess: () => {
+      setIsEditing(false);
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+    onError: (err) => console.error('Failed to update post', err),
+  });
+
+  const isAuthor = user?.id === authorId;
+
   const handleHug = async () => {
     if (!hasHugged) {
       setHugs(prev => prev + 1);
@@ -109,9 +132,53 @@ export const PostCard: React.FC<PostCardProps> = ({
       </div>
 
       {/* Content */}
-      <p className={`${styles.content} ${isAnonymous ? styles.italicContent : ''}`}>
-        {content}
-      </p>
+      <div className={styles.contentArea}>
+        {isEditing ? (
+          <div className={styles.editWrapper}>
+            <textarea
+              className={styles.editTextarea}
+              value={editedContent}
+              onChange={(e) => setEditedContent(e.target.value)}
+              autoFocus
+            />
+            <div className={styles.editActions}>
+              <button className={styles.cancelBtn} onClick={() => setIsEditing(false)}>Cancel</button>
+              <button 
+                className={styles.saveBtn}
+                onClick={() => updatePost()} 
+                disabled={updatingPost} 
+              >
+                {updatingPost ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className={`${styles.content} ${isAnonymous ? styles.italicContent : ''}`}>
+            {content}
+          </p>
+        )}
+
+        {isAuthor && !isEditing && (
+          <div className={styles.authorActions}>
+            <button 
+              className={styles.iconBtn}
+              onClick={() => setIsEditing(true)} 
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+            </button>
+            <button 
+              className={`${styles.iconBtn} ${styles.iconBtnDel}`}
+              onClick={() => {
+                if (window.confirm('Are you sure you want to delete this post?')) {
+                  deletePost();
+                }
+              }} 
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Actions */}
       <div className={styles.actions}>

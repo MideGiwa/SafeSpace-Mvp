@@ -59,6 +59,7 @@ export const Community: React.FC = () => {
               <PostCard
                 id={post.id}
                 authorName={post.authorName || 'Anonymous Member'}
+                authorId={post.authorId}
                 authorImage={post.authorImage}
                 isAnonymous={post.isAnonymous}
                 timeAgo={new Date(post.createdAt).toLocaleDateString()}

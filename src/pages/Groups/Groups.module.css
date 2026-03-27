@@ -288,6 +288,22 @@
 }
 .joinBtn:hover { transform: scale(1.05); }
 
+.enterBtn {
+  background-color: var(--surface-container-high);
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  padding: 0.5rem 1.5rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.enterBtn:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
 
 /* Matchmaker Bento in Grid */
 .matchmaker {
@@ -363,4 +379,108 @@
 }
 .matchDecor span {
   font-size: 16rem;
+}
+
+/* Joined Groups Section */
+.joinedSection {
+  margin-bottom: 4rem;
+  padding: 1.5rem;
+  background-color: var(--surface-container-low);
+  border-radius: 2rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.sectionHeader span {
+  color: var(--tertiary);
+  font-size: 1.5rem;
+}
+
+.sectionHeader h2 {
+  font-family: var(--font-headline);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--on-surface);
+}
+
+.joinedScroll {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scrollbar-width: none;
+}
+.joinedScroll::-webkit-scrollbar { display: none; }
+
+.joinedMiniCard {
+  flex: 0 0 18rem;
+  background-color: white;
+  border-radius: 1.25rem;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  position: relative;
+}
+.joinedMiniCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16,88,195,0.08);
+}
+
+.joinedMiniCard img {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  object-fit: cover;
+}
+
+.miniInfo {
+  flex: 1;
+}
+
+.miniInfo h4 {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--on-surface);
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.miniTag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+.miniEnterBtn {
+  background-color: var(--surface-container);
+  color: var(--on-surface-variant);
+  border: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.joinedMiniCard:hover .miniEnterBtn {
+  background-color: var(--primary);
+  color: white;
 }

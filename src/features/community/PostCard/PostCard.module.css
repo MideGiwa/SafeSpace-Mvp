@@ -254,3 +254,96 @@
 .commentSubmit .material-symbols-outlined {
   font-size: 1.1rem;
 }
+
+/* Edit Mode & Author Actions */
+.contentArea {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.editWrapper {
+  padding: 1rem;
+  background: var(--surface-container-low, #f8fafc);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.editTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  min-height: 120px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: white;
+  resize: vertical;
+}
+
+.editActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.cancelBtn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.saveBtn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: white;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.authorActions {
+  position: absolute;
+  top: -2.75rem;
+  right: 0;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: var(--radius-full);
+  transition: all 0.2s;
+}
+
+.iconBtn:hover {
+  background: var(--surface-container-high);
+  color: var(--primary);
+}
+
+.iconBtnDel {
+  color: #ef4444;
+}
+
+.iconBtnDel:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}

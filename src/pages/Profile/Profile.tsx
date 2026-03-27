@@ -30,22 +30,26 @@ export const Profile: React.FC = () => {
 
   // Fetch fresh profile from API
   const { data: profile, isLoading } = useQuery({
-    queryKey: ['profile', 'me'],
-    queryFn: profileService.getProfile,
+    queryKey: ['profile', storeUser?.id],
+    queryFn: () => storeUser?.id ? profileService.getProfile(storeUser.id) : Promise.reject('No user ID'),
+    enabled: !!storeUser?.id,
     initialData: storeUser ?? undefined,
     staleTime: 60_000,
   });
 
   // Update profile mutation
   const { mutate: saveProfile, isPending: saving } = useMutation({
-    mutationFn: () => profileService.updateProfile({
-      pseudonym: form.pseudonym || undefined,
-      firstName: form.firstName || undefined,
-      lastName: form.lastName || undefined,
-    }),
+    mutationFn: () => {
+      if (!storeUser?.id) throw new Error('No user ID');
+      return profileService.updateProfile(storeUser.id, {
+        pseudonym: form.pseudonym || undefined,
+        firstName: form.firstName || undefined,
+        lastName: form.lastName || undefined,
+      });
+    },
     onSuccess: (updated) => {
       updateUser(updated);
-      queryClient.setQueryData(['profile', 'me'], updated);
+      queryClient.setQueryData(['profile', storeUser?.id], updated);
       setIsEditing(false);
     },
     onError: (err) => console.error('Profile update failed', err),
@@ -81,7 +85,7 @@ export const Profile: React.FC = () => {
           {profile?.role && (
             <span className={styles.rolePill}>{roleLabel[profile.role] ?? profile.role}</span>
           )}
-          {kyc && (
+          {kyc && profile?.role !== 'REGULAR' && (
             <span className={styles.kycBadge} style={{ color: kyc.color }}>
               <span className="material-symbols-outlined">
                 {profile?.kycStatus === 'VERIFIED' ? 'verified' : 'pending'}
@@ -197,16 +201,18 @@ export const Profile: React.FC = () => {
             </div>
             <AnonToggle />
           </div>
-          <div className={styles.settingItem}>
-            <div className={styles.settingInfo}>
-              <span className="material-symbols-outlined">verified_user</span>
-              <div>
-                <h4>Identity verification (KYC)</h4>
-                <p>Verify your identity to unlock additional features</p>
+          {profile?.role !== 'REGULAR' && (
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <span className="material-symbols-outlined">verified_user</span>
+                <div>
+                  <h4>Identity verification (KYC)</h4>
+                  <p>Verify your identity to unlock additional features</p>
+                </div>
               </div>
+              <span className={styles.settingChevron}>›</span>
             </div>
-            <span className={styles.settingChevron}>›</span>
-          </div>
+          )}
         </div>
       </section>
 

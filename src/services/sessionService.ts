@@ -17,18 +17,28 @@ export interface UpcomingSession {
 
 export const sessionService = {
   getUpcomingSessions: async (): Promise<UpcomingSession[]> => {
-    // In a real app, this would be a GET /bookings/upcoming or similar
-    // For now, we'll try to fetch from /users/me/bookings if it exists, 
-    // but the backend integration is still in progress so we'll handle errors gracefully
-    try {
-      const response = await api.get('/users/me/bookings');
-      console.log('Fetched sessions:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching sessions:', error);
-      // Fallback to empty array or throw error for Query to handle
-      throw error;
-    }
+    // Note: The backend currently lacks a global "Upcoming Sessions" aggregator.
+    // For now, we return mock data to keep the UI functional while cross-group 
+    // aggregation logic is implemented in the API layer.
+    return [
+      {
+        id: 'mock-1',
+        clientName: 'Sarah Jenkins',
+        sessionType: 'CBT Therapy',
+        time: '14:30',
+        durationMins: 45,
+        mode: 'video',
+        isNext: true,
+      },
+      {
+        id: 'mock-2',
+        clientName: 'Support Group: Anxiety',
+        sessionType: 'Peer Support',
+        time: '16:00',
+        durationMins: 60,
+        mode: 'voice',
+      }
+    ];
   },
 
   getStats: async () => {
