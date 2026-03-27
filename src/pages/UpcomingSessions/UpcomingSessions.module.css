@@ -161,3 +161,41 @@
   box-shadow: 0 20px 40px rgba(126,26,102,0.3); transition: transform 0.3s; z-index: 50;
 }
 .fab:hover { transform: scale(1.1); }
+
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-container) 25%, var(--surface-container-high) 50%, var(--surface-container) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 0.5rem;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeletonHero {
+  height: 12rem;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+}
+
+.skeletonRow {
+  height: 5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.skeletonText {
+  height: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.skeletonTitle {
+  height: 2rem;
+  width: 60%;
+  margin-bottom: 1rem;
+}

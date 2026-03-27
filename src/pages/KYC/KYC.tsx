@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { kycService } from '../../services/kycService';
 import styles from './KYC.module.css';
 
@@ -169,7 +170,11 @@ export const KYC: React.FC = () => {
       <p className={styles.verifySubtitle}>Your professional profile is now verified. Welcome to the sanctuary.</p>
       
       <div style={{marginTop: '2rem'}}>
-        <button className={styles.btnVerify} onClick={() => navigate('/pro-dashboard')}>
+        <button className={styles.btnVerify} onClick={() => {
+          const user = useAuthStore.getState().user;
+          const navTarget = user?.role === 'PROFESSIONAL' ? '/pro-dashboard' : '/leader';
+          navigate(navTarget);
+        }}>
           Continue to Dashboard <span className="material-symbols-outlined">arrow_forward</span>
         </button>
       </div>

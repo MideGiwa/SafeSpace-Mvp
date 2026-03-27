@@ -18,18 +18,33 @@ import { ProfessionalDashboard } from './pages/ProfessionalDashboard/Professiona
 import { KYC } from './pages/KYC/KYC';
 import { GroupLeader } from './pages/GroupLeader/GroupLeader';
 import { ModerationAdmin } from './pages/ModerationAdmin/ModerationAdmin';
+import { RoleGuard } from './components/guards/RoleGuard';
 import { UpcomingSessions } from './pages/UpcomingSessions/UpcomingSessions';
 import { SessionDetails } from './pages/SessionDetails/SessionDetails';
 import { SessionHistory } from './pages/SessionHistory/SessionHistory';
 import { ComingSoon } from './pages/ComingSoon/ComingSoon';
 import { Home } from './pages/Home/Home';
 import { Tokens } from './pages/Tokens/Tokens';
+import { Profile } from './pages/Profile/Profile';
+import { Toaster } from 'sonner';
 
 function App() {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   return (
     <BrowserRouter>
+      <Toaster 
+        position="top-right" 
+        expand={false} 
+        richColors 
+        closeButton
+        toastOptions={{
+          style: {
+            fontFamily: 'var(--font-body)',
+            borderRadius: 'var(--radius-md)',
+          },
+        }}
+      />
       {isAuthenticated ? (
         <AppShell>
           <Routes>
@@ -40,13 +55,35 @@ function App() {
             <Route path="/directory" element={<Directory />} />
             <Route path="/directory/:id" element={<ProfessionalProfile />} />
             <Route path="/pro-dashboard" element={<ProfessionalDashboard />} />
-            <Route path="/kyc" element={<KYC />} />
+            <Route 
+              path="/kyc" 
+              element={
+                <RoleGuard allowedRoles={['PROFESSIONAL', 'VERIFIED_PERSON', 'ADMIN']}>
+                  <KYC />
+                </RoleGuard>
+              } 
+            />
             <Route path="/call" element={<VoiceSession />} />
             <Route path="/sessions" element={<UpcomingSessions />} />
             <Route path="/session-details" element={<SessionDetails />} />
             <Route path="/history" element={<SessionHistory />} />
-            <Route path="/leader" element={<GroupLeader />} />
-            <Route path="/admin" element={<ModerationAdmin />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route
+              path="/leader"
+              element={
+                <RoleGuard allowedRoles={['LEADER', 'ADMIN']}>
+                  <GroupLeader />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <RoleGuard allowedRoles={['ADMIN']}>
+                  <ModerationAdmin />
+                </RoleGuard>
+              }
+            />
             <Route path="/inbox" element={<ComingSoon title="Inbox" />} />
             <Route path="/tokens" element={<Tokens />} />
             <Route path="*" element={<Navigate to="/home" replace />} />

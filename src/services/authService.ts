@@ -7,8 +7,8 @@ export interface User {
   firstName?: string;
   lastName?: string;
   dob?: string;
-  role: 'REGULAR' | 'VERIFIED_PERSON' | 'PROFESSIONAL' | 'ADMIN';
-  kycStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
+  role: 'REGULAR' | 'VERIFIED_PERSON' | 'PROFESSIONAL' | 'ADMIN' | 'LEADER';
+  kycStatus: 'PENDING' | 'VERIFIED' | 'FAILED' | 'MANUAL_REVIEW';
   isBanned: boolean;
   dmOptIn: boolean;
   [key: string]: any;

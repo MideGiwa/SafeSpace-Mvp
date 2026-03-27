@@ -1,7 +1,7 @@
 import { api } from './api';
 
 export interface KycStatusResponse {
-  kycStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
+  kycStatus: 'PENDING' | 'VERIFIED' | 'FAILED' | 'MANUAL_REVIEW';
 }
 
 export const kycService = {

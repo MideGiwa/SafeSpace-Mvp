@@ -51,8 +51,14 @@ export const Auth: React.FC = () => {
 
       loginAction(authResponse.user, authResponse.access_token, authResponse.refresh_token);
       
-      // If professional, go to pro-dashboard, else go to onboarding
-      const navTarget = (authResponse.user.role === 'PROFESSIONAL') ? '/pro-dashboard' : '/onboarding';
+      // Role-aware redirect
+      let navTarget = '/onboarding';
+      if (authResponse.user.role === 'PROFESSIONAL') {
+        navTarget = '/kyc';
+      } else if (authResponse.user.role === 'ADMIN') {
+        navTarget = '/admin';
+      }
+      
       navigate(navTarget);
       
     } catch (err: any) {

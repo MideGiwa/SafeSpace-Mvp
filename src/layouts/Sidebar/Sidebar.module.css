@@ -33,6 +33,15 @@
   letter-spacing: -0.02em;
 }
 
+.profileSectionLink {
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.profileSectionLink:hover {
+  opacity: 0.8;
+}
+
 .profileSection {
   display: flex;
   align-items: center;
@@ -47,6 +56,16 @@
   border-radius: var(--radius-full);
   overflow: hidden;
   background-color: var(--surface-container-highest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarInitials {
+  font-family: var(--font-headline);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary);
 }
 
 .avatar img {
@@ -61,18 +80,19 @@
 }
 
 .profileGreeting {
-  font-weight: 700;
-  color: var(--on-surface);
-  font-size: 0.875rem;
-}
-
-.profileSubtitle {
+  font-weight: 600;
   color: var(--on-surface-variant);
   font-size: 0.75rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profileName {
+  font-family: var(--font-headline);
+  font-weight: 800;
+  color: var(--on-surface);
+  font-size: 1rem;
+  line-height: 1.2;
 }
 
 .navMenu {

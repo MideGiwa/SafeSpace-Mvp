@@ -26,24 +26,6 @@
   align-items: flex-start;
 }
 
-.toggleStateBtn {
-  background: var(--surface-2);
-  border: 1px solid var(--border-color);
-  color: var(--on-surface-variant);
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.toggleStateBtn:active {
-  background: var(--surface-1);
-}
-
 .italicHigh {
   font-style: italic;
   color: var(--tertiary);
@@ -96,6 +78,37 @@
   cursor: pointer;
 }
 
+/* Write Post Bar (Active User) */
+.writePostBar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.writePostBar:hover {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  border-color: var(--primary);
+}
+
+.writePostBar span {
+  color: var(--primary);
+  font-size: 1.4rem;
+}
+
+.writePostBar p {
+  color: var(--on-surface-variant);
+  font-size: 0.9rem;
+  flex: 1;
+  margin: 0;
+}
+
 /* Quick Actions */
 .quickActions {
   display: flex;
@@ -109,6 +122,13 @@
   border-radius: 1.25rem;
   padding: 1rem;
   box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.actionCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.07);
 }
 
 .iconHeart {
@@ -136,6 +156,178 @@
 }
 
 /* Sections */
+/* Sessions List */
+.sessionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sessionCard {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sessionCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+}
+
+.sessionTime {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-container-low);
+  padding: 0.75rem;
+  border-radius: 1rem;
+  color: var(--primary);
+  min-width: 80px;
+}
+
+.sessionTime .material-symbols-outlined {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.sessionTime span:last-child {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.sessionInfo {
+  flex: 1;
+}
+
+.sessionInfo h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--on-surface);
+  margin-bottom: 0.15rem;
+}
+
+.sessionInfo p {
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+/* Updates List */
+.updatesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.updateCard {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  cursor: pointer;
+  transition: border-color 0.2s;
+  border: 1px solid transparent;
+}
+
+.updateCard:hover {
+  border-color: var(--primary-container);
+}
+
+.updateHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.updateGroup {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.updateTime {
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+}
+
+.updateContent {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--on-surface);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Onboarding Section */
+.onboardingSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.ctaCard {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  border: 1px solid var(--surface-container);
+}
+
+.ctaCard:hover {
+  transform: scale(1.01);
+  background-color: var(--surface-container-low);
+  border-color: var(--primary);
+}
+
+.ctaIcon {
+  width: 3.5rem;
+  height: 3.5rem;
+  background: var(--primary-container);
+  color: white;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ctaIcon .material-symbols-outlined {
+  font-size: 1.75rem;
+}
+
+.ctaContent {
+  flex: 1;
+}
+
+.ctaContent h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+  color: var(--on-surface);
+}
+
+.ctaContent p {
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+  line-height: 1.4;
+}
+
 .section {
   margin-bottom: 2rem;
 }
@@ -207,6 +399,8 @@
   height: 3rem;
   border-radius: var(--radius-full);
   background-color: #E2E8F0;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .proAvatar img {
@@ -227,26 +421,13 @@
   color: var(--on-surface-variant);
 }
 
-.proRating {
-  font-size: 0.85rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-.star { color: #F59E0B; }
-.reviews {
-  color: var(--on-surface-variant);
-  font-weight: 500;
-  font-size: 0.75rem;
-  margin-left: 0.25rem;
-}
-
 .bookBtn {
   width: 100%;
   padding: 0.6rem;
   font-size: 0.9rem;
 }
 
-/* Active Groups */
+/* Active Groups Grid */
 .activeGroupsGrid {
   display: flex;
   gap: 1rem;
@@ -260,7 +441,7 @@
 .activeGroupsGrid::-webkit-scrollbar { display: none; }
 
 .activeGroupCard {
-  min-width: 200px;
+  min-width: 180px;
   background-color: white;
   border-radius: 1.25rem;
   padding: 1.25rem;
@@ -283,14 +464,14 @@
 }
 
 .agcContent h4 {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--on-surface);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
 }
 
 .agcContent p {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--on-surface-variant);
 }
 
@@ -304,6 +485,7 @@
   border-radius: var(--radius-full);
   padding: 0.5rem;
   cursor: pointer;
+  font-size: 0.8rem;
 }
 
 /* Group List */
@@ -330,6 +512,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 .groupIconPink { background-color: #ffdff4; color: var(--tertiary); }
 .groupIconBlue { background-color: #e6f0ff; color: var(--primary); }
@@ -344,35 +527,6 @@
 .groupDetails p {
   font-size: 0.75rem;
   color: var(--on-surface-variant);
-  margin-bottom: 0.5rem;
-}
-
-.avatars {
-  display: flex;
-  align-items: center;
-}
-.avatarMini {
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: var(--radius-full);
-  background-color: #CBD5E1;
-  border: 2px solid white;
-  margin-left: -0.5rem;
-}
-.avatarMini:first-child { margin-left: 0; }
-.avatarMiniCount {
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: var(--radius-full);
-  background-color: var(--primary);
-  color: white;
-  font-size: 0.5rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid white;
-  margin-left: -0.5rem;
 }
 
 .joinBtn {
@@ -387,6 +541,76 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Community Post Feed */
+.postList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.postCard {
+  background-color: white;
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.postMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.postAuthor {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--on-surface);
+}
+
+.postGroup {
+  font-size: 0.72rem;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+}
+
+.postTime {
+  font-size: 0.72rem;
+  color: var(--on-surface-variant);
+  margin-left: auto;
+}
+
+.postContent {
+  font-size: 0.9rem;
+  color: var(--on-surface);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.postStats {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.postStats span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  font-weight: 600;
+}
+
+.postStats .material-symbols-outlined {
+  font-size: 1rem;
+  color: var(--tertiary);
 }
 
 /* Newsletter */

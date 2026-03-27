@@ -32,7 +32,6 @@ export const Tokens: React.FC = () => {
             <span className={styles.balanceNum}>13</span>
             <span className={styles.balanceSuffix}>tokens</span>
           </div>
-          <p className={styles.balanceNote}>Enough for 2 individual sessions, or 6 group slots</p>
         </div>
         <div className={styles.balanceRight}>
           <button className={styles.addBtn} onClick={() => setTab('fund')}>
