@@ -1,8 +1,8 @@
-import { api } from './api';
 
 export interface UpcomingSession {
   id: string;
-  clientName: string;
+  clientName?: string;
+  professionalName?: string;
   clientInitials?: string;
   clientImage?: string;
   sessionType: string;
@@ -17,9 +17,8 @@ export interface UpcomingSession {
 
 export const sessionService = {
   getUpcomingSessions: async (): Promise<UpcomingSession[]> => {
-    // Note: The backend currently lacks a global "Upcoming Sessions" aggregator.
-    // For now, we return mock data to keep the UI functional while cross-group 
-    // aggregation logic is implemented in the API layer.
+    // Note: The official API only handles per-group sessions (GET /groups/:id/sessions).
+    // This global method is provided as a frontend compatibility layer.
     return [
       {
         id: 'mock-1',
@@ -39,10 +38,5 @@ export const sessionService = {
         mode: 'voice',
       }
     ];
-  },
-
-  getStats: async () => {
-    const response = await api.get('/users/me/sessions/stats');
-    return response.data;
   }
 };

@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { Button } from '../../components/ui/Button/Button';
 import { professionals } from '../../data/professionals';
-import { upcomingSessions } from '../../data/sessions';
 import { useAuthStore } from '../../stores/useAuthStore';
 import styles from './Home.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -9,29 +8,46 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { communityService } from '../../services/communityService';
 import { groupService } from '../../services/groupService';
+import { sessionService } from '../../services/sessionService';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuthStore();
 
   // ─── Fetch real data ───────────────────────────────────────────
-  const { data: postsData } = useQuery({
+  const { data: postsData, isLoading: isLoadingPosts } = useQuery({
     queryKey: ['posts'],
     queryFn: () => communityService.getPosts(1, 5),
     enabled: isAuthenticated
   });
 
-  const { data: groupsData } = useQuery({
+  const { data: groupsData, isLoading: isLoadingGroups } = useQuery({
     queryKey: ['groups'],
     queryFn: () => groupService.getGroups(),
     enabled: isAuthenticated
   });
 
+  const { data: sessions, isLoading: isLoadingSessions } = useQuery({
+    queryKey: ['upcomingSessions'],
+    queryFn: sessionService.getUpcomingSessions,
+    enabled: isAuthenticated
+  });
+
+  const isProfessional = user?.role === 'PROFESSIONAL';
+  const isLeader = user?.role === 'LEADER';
+  
   // Derive display name: prefer pseudonym, then firstName, fallback to "there"
   const displayName = useMemo(() => {
     if (!user) return 'there';
     return user.pseudonym || user.firstName || 'there';
   }, [user]);
+
+  const welcomePrefix = useMemo(() => {
+    if (!isAuthenticated) return 'Find Your';
+    if (isProfessional) return 'Welcome back, Specialist';
+    if (isLeader) return 'Greetings, Leader';
+    return 'Welcome back,';
+  }, [isAuthenticated, isProfessional, isLeader]);
 
   const userGroups = groupsData || [];
   const posts = postsData?.data || [];
@@ -43,7 +59,7 @@ export const Home: React.FC = () => {
       <header className={styles.header}>
         <div className={styles.headerTop}>
           <h1 className={styles.titleInfo}>
-            {isAuthenticated ? 'Welcome back,' : 'Find Your'}<br />
+            {welcomePrefix}<br />
             <span className={styles.italicHigh}>
               {isAuthenticated ? displayName : 'Sanctuary'}
             </span>
@@ -51,7 +67,9 @@ export const Home: React.FC = () => {
         </div>
         <p className={styles.subtitleInfo}>
           {isAuthenticated
-            ? 'Your dedicated space for healing and continuous growth.'
+            ? (isProfessional 
+                ? 'Your dashboard for managing sessions and helping the community grow.' 
+                : 'Your dedicated space for healing and continuous growth.')
             : 'A cushioned digital space designed for healing, community support, and professional care.'}
         </p>
       </header>
@@ -67,17 +85,23 @@ export const Home: React.FC = () => {
         </section>
       )}
 
-      {/* ── AUTHENTICATED & HAS GROUPS: Upcoming Sessions & Updates ── */}
-      {isAuthenticated && hasGroups && (
-        <>
-          {/* Upcoming Sessions Section */}
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>Upcoming Sessions</h2>
-              <button className={styles.seeAllBtn} onClick={() => navigate('/sessions')}>View All</button>
-            </div>
-            <div className={styles.sessionsList}>
-              {(upcomingSessions as any[]).slice(0, 2).map((session: any) => (
+      {/* ── AUTHENTICATED: Upcoming Sessions ── */}
+      {isAuthenticated && (
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              {isProfessional ? "Today's Appointments" : "Upcoming Sessions"}
+            </h2>
+            <button className={styles.seeAllBtn} onClick={() => navigate('/sessions')}>View All</button>
+          </div>
+          <div className={styles.sessionsList}>
+            {isLoadingSessions ? (
+              <>
+                <div className={`${styles.skeleton} ${styles.skeletonSession}`} />
+                <div className={`${styles.skeleton} ${styles.skeletonSession}`} />
+              </>
+            ) : sessions && sessions.length > 0 ? (
+              sessions.slice(0, 2).map((session) => (
                 <div key={session.id} className={styles.sessionCard} onClick={() => navigate('/call')}>
                   <div className={styles.sessionTime}>
                     <span className="material-symbols-outlined">schedule</span>
@@ -85,37 +109,20 @@ export const Home: React.FC = () => {
                   </div>
                   <div className={styles.sessionInfo}>
                     <h4>{session.sessionType}</h4>
-                    <p>with {session.clientName}</p>
+                    <p>{isProfessional ? `Client: ${session.clientName || 'Anonymous'}` : `with ${session.professionalName || 'Specialist'}`}</p>
                   </div>
                   <span className="material-symbols-outlined">chevron_right</span>
                 </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Group Updates Section */}
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>Updates from your groups</h2>
-              <button className={styles.seeAllBtn} onClick={() => navigate('/community')}>Community</button>
-            </div>
-            <div className={styles.updatesList}>
-              {(posts as any[]).slice(0, 3).map((post: any) => (
-                <div key={post.id} className={styles.updateCard} onClick={() => navigate('/community')}>
-                  <div className={styles.updateHeader}>
-                    <span className={styles.updateGroup}>{post.authorName || 'Member'}</span>
-                    <span className={styles.updateTime}>{new Date(post.createdAt).toLocaleDateString()}</span>
-                  </div>
-                  <p className={styles.updateContent}>{post.content}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        </>
+              ))
+            ) : (
+              <div className={styles.emptyState}>No sessions scheduled for today.</div>
+            )}
+          </div>
+        </section>
       )}
 
-      {/* ── AUTHENTICATED & NO GROUPS: Onboarding CTAs ──────────── */}
-      {isAuthenticated && !hasGroups && (
+      {/* ── AUTHENTICATED & NO GROUPS (MEMBER) ──────────── */}
+      {isAuthenticated && !isProfessional && !hasGroups && !isLoadingGroups && (
         <section className={styles.onboardingSection}>
           <div className={styles.ctaCard} onClick={() => navigate('/groups')}>
             <div className={styles.ctaIcon}><span className="material-symbols-outlined">hub</span></div>
@@ -137,8 +144,63 @@ export const Home: React.FC = () => {
         </section>
       )}
 
-      {/* ── Always show Professionals if not in groups or just as fallback ── */}
-      {(!isAuthenticated || !hasGroups) && (
+      {/* ── PROFESSIONAL CTAs ─────────────────────────── */}
+      {isAuthenticated && isProfessional && (
+        <section className={styles.onboardingSection}>
+          <div className={styles.ctaCard} onClick={() => navigate('/professional/availability')}>
+            <div className={styles.ctaIcon}><span className="material-symbols-outlined">calendar_month</span></div>
+            <div className={styles.ctaContent}>
+              <h3>Set Availability</h3>
+              <p>Manage your working hours and session slots.</p>
+            </div>
+            <span className="material-symbols-outlined">arrow_forward</span>
+          </div>
+          
+          <div className={styles.ctaCard} onClick={() => navigate('/professional/requests')}>
+            <div className={styles.ctaIcon}><span className="material-symbols-outlined">mail</span></div>
+            <div className={styles.ctaContent}>
+              <h3>Session Requests</h3>
+              <p>View and accept incoming specialized care requests.</p>
+            </div>
+            <span className="material-symbols-outlined">arrow_forward</span>
+          </div>
+        </section>
+      )}
+
+      {/* ── Updates List ────────────────────────────────────────────── */}
+      {isAuthenticated && !isProfessional && (
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              {isProfessional ? 'Community Insights' : 'Updates from your groups'}
+            </h2>
+            <button className={styles.seeAllBtn} onClick={() => navigate('/community')}>Community</button>
+          </div>
+          <div className={styles.updatesList}>
+            {isLoadingPosts ? (
+              <>
+                <div className={`${styles.skeleton} ${styles.skeletonUpdate}`} />
+                <div className={`${styles.skeleton} ${styles.skeletonUpdate}`} />
+              </>
+            ) : posts.length > 0 ? (
+              posts.slice(0, 3).map((post) => (
+                <div key={post.id} className={styles.updateCard} onClick={() => navigate('/community')}>
+                  <div className={styles.updateHeader}>
+                    <span className={styles.updateGroup}>{post.authorName || 'Member'}</span>
+                    <span className={styles.updateTime}>{new Date(post.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <p className={styles.updateContent}>{post.content}</p>
+                </div>
+              ))
+            ) : (
+              <div className={styles.emptyState}>No community updates yet.</div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── Always show Professionals only for Members ── */}
+      {(!isAuthenticated || !isProfessional) && (
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <div>
@@ -148,7 +210,7 @@ export const Home: React.FC = () => {
             <button className={styles.seeAllBtn} onClick={() => navigate('/directory')}>See All</button>
           </div>
           <div className={styles.proScroller}>
-            {(professionals as any[]).slice(0, 3).map((pro: any) => (
+            {professionals.slice(0, 3).map((pro) => (
               <div key={pro.id} className={styles.proCard}>
                 <div className={styles.proInfo}>
                   <div className={styles.proAvatar}>
@@ -172,26 +234,25 @@ export const Home: React.FC = () => {
         </section>
       )}
 
-      {/* ── Quick Actions (Authenticated only) ────────────────────── */}
+      {/* ── Quick Actions ────────────────────── */}
       {isAuthenticated && (
         <div className={styles.quickActions}>
           <div className={styles.actionCard} onClick={() => navigate('/community')}>
             <div className={styles.iconHeart}><span className="material-symbols-outlined">forum</span></div>
-            <h3>Community Wall</h3>
+            <h3>{isProfessional ? 'Platform Feed' : 'Community Wall'}</h3>
             <p>Shared stories.</p>
-          </div>
-          <div className={styles.actionCard} onClick={() => navigate('/tokens')}>
-            <div className={styles.iconSecure}><span className="material-symbols-outlined">toll</span></div>
-            <h3>My Wallet</h3>
-            <p>Token balance.</p>
           </div>
         </div>
       )}
 
       {/* ── Newsletter ────────────────────────────────────────────── */}
       <section className={styles.newsletter}>
-        <h3>Stay Grounded</h3>
-        <p>Weekly mindfulness tips and community updates delivered to your inbox.</p>
+        <h3>{isProfessional ? 'Clinical Excellence' : 'Stay Grounded'}</h3>
+        <p>
+          {isProfessional 
+            ? 'Professional resources and therapist-focused updates for your practice.'
+            : 'Weekly mindfulness tips and community updates delivered to your inbox.'}
+        </p>
         <div className={styles.newsInput}>
           <input type="email" placeholder="Email address" aria-label="Email address" />
           <button>Join</button>

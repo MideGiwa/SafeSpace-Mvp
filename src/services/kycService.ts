@@ -6,23 +6,23 @@ export interface KycStatusResponse {
 
 export const kycService = {
   verifyBvn: async (bvn: string): Promise<void> => {
-    await api.post('/kyc/verify/bvn', { bvn });
+    await api.post('kyc/verify/bvn', { bvn });
   },
 
   verifyNin: async (nin: string): Promise<void> => {
-    await api.post('/kyc/verify/nin', { nin });
+    await api.post('kyc/verify/nin', { nin });
   },
 
   getStatus: async (): Promise<KycStatusResponse> => {
-    const response = await api.get<KycStatusResponse>('/kyc/status');
+    const response = await api.get<KycStatusResponse>('kyc/status');
     return response.data;
   },
 
   approveKyc: async (userId: string): Promise<void> => {
-    await api.patch(`/kyc/${userId}/approve`);
+    await api.patch(`kyc/${userId}/approve`);
   },
 
   rejectKyc: async (userId: string, reason: string): Promise<void> => {
-    await api.patch(`/kyc/${userId}/reject`, { reason });
+    await api.patch(`kyc/${userId}/reject`, { reason });
   }
 };

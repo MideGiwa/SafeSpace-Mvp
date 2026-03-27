@@ -1,235 +1,274 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { profileService } from '../../services/profileService';
+import { kycService } from '../../services/kycService';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { toast } from 'sonner';
 import styles from './Profile.module.css';
 
-const kycStatusLabel: Record<string, { label: string; color: string }> = {
-  PENDING: { label: 'Verification Pending', color: 'var(--warning, #F59E0B)' },
-  VERIFIED: { label: 'Verified', color: 'var(--success, #22C55E)' },
-  REJECTED: { label: 'Unverified', color: 'var(--error, #EF4444)' },
-};
-
-const roleLabel: Record<string, string> = {
-  REGULAR: 'Community Member',
-  VERIFIED_PERSON: 'Verified Member',
-  PROFESSIONAL: 'Mental Health Professional',
-  ADMIN: 'Administrator',
-};
+type VerificationMethod = 'NIN' | 'BVN';
 
 export const Profile: React.FC = () => {
   const queryClient = useQueryClient();
   const { user: storeUser, updateUser } = useAuthStore();
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'info' | 'verify' | 'privacy'>('info');
+  const [vMethod, setVMethod] = useState<VerificationMethod>('NIN');
+  const [vValue, setVValue] = useState('');
+  
   const [form, setForm] = useState({
     pseudonym: storeUser?.pseudonym ?? '',
     firstName: storeUser?.firstName ?? '',
     lastName: storeUser?.lastName ?? '',
   });
 
-  // Fetch fresh profile from API
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', storeUser?.id],
     queryFn: () => storeUser?.id ? profileService.getProfile(storeUser.id) : Promise.reject('No user ID'),
     enabled: !!storeUser?.id,
-    initialData: storeUser ?? undefined,
-    staleTime: 60_000,
   });
 
-  // Update profile mutation
+  const { data: kycStatusData } = useQuery({
+    queryKey: ['kycStatus'],
+    queryFn: kycService.getStatus,
+    refetchInterval: (query) => query.state.data?.kycStatus === 'PENDING' ? 5000 : false,
+    enabled: !!storeUser?.id
+  });
+
+  const currentKycStatus = kycStatusData?.kycStatus || profile?.kycStatus;
+
+  const isNamesComplete = useMemo(() => {
+    return !!profile?.firstName && !!profile?.lastName;
+  }, [profile]);
+
   const { mutate: saveProfile, isPending: saving } = useMutation({
-    mutationFn: () => {
-      if (!storeUser?.id) throw new Error('No user ID');
-      return profileService.updateProfile(storeUser.id, {
-        pseudonym: form.pseudonym || undefined,
-        firstName: form.firstName || undefined,
-        lastName: form.lastName || undefined,
-      });
-    },
+    mutationFn: (data: any) => profileService.updateProfile(storeUser!.id!, data),
     onSuccess: (updated) => {
       updateUser(updated);
-      queryClient.setQueryData(['profile', storeUser?.id], updated);
-      setIsEditing(false);
-    },
-    onError: (err) => console.error('Profile update failed', err),
+      queryClient.invalidateQueries({ queryKey: ['profile', storeUser?.id] });
+      toast.success('Identity updated');
+    }
   });
 
-  const displayName = profile?.pseudonym || profile?.firstName || 'Member';
-  const initials = (profile?.firstName?.[0] ?? '') + (profile?.lastName?.[0] ?? '');
-  const kyc = profile?.kycStatus ? kycStatusLabel[profile.kycStatus] : null;
+  const { mutate: startKyc, isPending: isVerifying } = useMutation({
+    mutationFn: () => vMethod === 'BVN' ? kycService.verifyBvn(vValue) : kycService.verifyNin(vValue),
+    onSuccess: () => {
+      toast.success('Verification submitted');
+      queryClient.invalidateQueries({ queryKey: ['profile', storeUser?.id] });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'Verification failed');
+    }
+  });
+
+  if (isLoading) return <div className={styles.loader}>Shaping your sanctuary...</div>;
+
+  const initials = ((profile?.firstName?.[0] || '') + (profile?.lastName?.[0] || '')).toUpperCase();
 
   return (
-    <div className={styles.page}>
-
-      {/* Hero Banner */}
-      <div className={styles.heroBanner} />
-
-      {/* Card */}
-      <div className={styles.profileCard}>
-
-        {/* Avatar placeholder */}
-        <div className={styles.avatarWrap}>
-          <div className={styles.avatar}>
-            {initials ? (
-              <span className={styles.avatarInitials}>{initials.toUpperCase()}</span>
-            ) : (
-              <span className="material-symbols-outlined">person</span>
-            )}
-          </div>
+    <div className={styles.container}>
+      {/* Sidebar-like Navigation inside the page */}
+      <aside className={styles.navSide}>
+        <div className={styles.userBrief}>
+          <div className={styles.avatarLarge}>{initials || '??'}</div>
+          <h3>{profile?.pseudonym || 'Mysterious Member'}</h3>
+          <p>{profile?.role?.toLowerCase().replace('_', ' ')}</p>
         </div>
-
-        {/* Name & role */}
-        <div className={styles.identityBlock}>
-          <h1 className={styles.displayName}>{displayName}</h1>
-          {profile?.role && (
-            <span className={styles.rolePill}>{roleLabel[profile.role] ?? profile.role}</span>
-          )}
-          {kyc && profile?.role !== 'REGULAR' && (
-            <span className={styles.kycBadge} style={{ color: kyc.color }}>
-              <span className="material-symbols-outlined">
-                {profile?.kycStatus === 'VERIFIED' ? 'verified' : 'pending'}
-              </span>
-              {kyc.label}
-            </span>
-          )}
-        </div>
-
-        {/* Info fields */}
-        {isLoading ? (
-          <div className={styles.loadingPulse}>
-            <div className={styles.skeletonLine} />
-            <div className={styles.skeletonLine} style={{ width: '60%' }} />
-          </div>
-        ) : isEditing ? (
-          <form
-            className={styles.editForm}
-            onSubmit={(e) => { e.preventDefault(); saveProfile(); }}
+        
+        <nav className={styles.sideMenu}>
+          <button 
+            className={`${styles.navItem} ${activeTab === 'info' ? styles.navActive : ''}`}
+            onClick={() => setActiveTab('info')}
           >
-            <div className={styles.fieldRow}>
-              <label className={styles.fieldLabel}>Display name (pseudonym)</label>
-              <input
-                className={styles.fieldInput}
-                value={form.pseudonym}
-                onChange={e => setForm(f => ({ ...f, pseudonym: e.target.value }))}
-                placeholder="e.g. Quiet Storm"
-              />
-            </div>
-            <div className={styles.fieldRow}>
-              <label className={styles.fieldLabel}>First name</label>
-              <input
-                className={styles.fieldInput}
-                value={form.firstName}
-                onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))}
-              />
-            </div>
-            <div className={styles.fieldRow}>
-              <label className={styles.fieldLabel}>Last name</label>
-              <input
-                className={styles.fieldInput}
-                value={form.lastName}
-                onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))}
-              />
-            </div>
-            <div className={styles.editActions}>
-              <button
-                type="button"
-                className={styles.btnCancel}
-                onClick={() => setIsEditing(false)}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className={styles.btnSave}
-                disabled={saving}
-              >
-                {saving ? 'Saving…' : 'Save Changes'}
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div className={styles.infoGrid}>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Email</span>
-              <span className={styles.infoValue}>{profile?.email ?? '—'}</span>
-            </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Pseudonym</span>
-              <span className={styles.infoValue}>{profile?.pseudonym ?? '—'}</span>
-            </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Full name</span>
-              <span className={styles.infoValue}>
-                {[profile?.firstName, profile?.lastName].filter(Boolean).join(' ') || '—'}
-              </span>
-            </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>DM opt-in</span>
-              <span className={styles.infoValue}>{profile?.dmOptIn ? 'Enabled' : 'Disabled'}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Edit toggle */}
-        {!isEditing && (
-          <button className={styles.editBtn} onClick={() => {
-            setForm({
-              pseudonym: profile?.pseudonym ?? '',
-              firstName: profile?.firstName ?? '',
-              lastName: profile?.lastName ?? '',
-            });
-            setIsEditing(true);
-          }}>
-            <span className="material-symbols-outlined">edit</span>
-            Edit Profile
+            <span className="material-symbols-outlined">badge</span> Personal Info
           </button>
-        )}
-      </div>
+          <button 
+            className={`${styles.navItem} ${activeTab === 'verify' ? styles.navActive : ''}`}
+            onClick={() => setActiveTab('verify')}
+          >
+            <span className="material-symbols-outlined">verified_user</span> Verification
+          </button>
+          <button 
+            className={`${styles.navItem} ${activeTab === 'privacy' ? styles.navActive : ''}`}
+            onClick={() => setActiveTab('privacy')}
+          >
+            <span className="material-symbols-outlined">security</span> Privacy & Safety
+          </button>
+        </nav>
+      </aside>
 
-      {/* Privacy & safety section */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Privacy & Safety</h2>
-        <div className={styles.settingsList}>
-          <div className={styles.settingItem}>
-            <div className={styles.settingInfo}>
-              <span className="material-symbols-outlined">visibility_off</span>
-              <div>
-                <h4>Anonymous mode</h4>
-                <p>Post and comment without showing your identity</p>
+      <main className={styles.contentArea}>
+        {activeTab === 'info' && (
+          <div className={styles.viewPanel}>
+            <header className={styles.panelHeader}>
+              <h2>Personal Information</h2>
+              <p>Update how you appear to the community and specialists.</p>
+            </header>
+
+            <div className={styles.formGrid}>
+              <div className={styles.inputGroup}>
+                <label>First Name</label>
+                <input 
+                  value={form.firstName} 
+                  onChange={e => setForm(prev => ({ ...prev, firstName: e.target.value }))}
+                  placeholder="Legal First Name"
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <label>Last Name</label>
+                <input 
+                  value={form.lastName} 
+                  onChange={e => setForm(prev => ({ ...prev, lastName: e.target.value }))}
+                  placeholder="Legal Last Name"
+                />
+              </div>
+              <div className={styles.inputGroupFull}>
+                <label>Pseudonym (Display Name)</label>
+                <input 
+                  value={form.pseudonym} 
+                  onChange={e => setForm(prev => ({ ...prev, pseudonym: e.target.value }))}
+                  placeholder="e.g. PeacefulMind"
+                />
+                <small>This is what other members will see.</small>
               </div>
             </div>
-            <AnonToggle />
+
+            <button 
+              className={styles.primaryBtn}
+              onClick={() => saveProfile(form)}
+              disabled={saving}
+            >
+              {saving ? 'Syncing...' : 'Save Changes'}
+            </button>
           </div>
-          {profile?.role !== 'REGULAR' && (
-            <div className={styles.settingItem}>
-              <div className={styles.settingInfo}>
-                <span className="material-symbols-outlined">verified_user</span>
+        )}
+
+        {activeTab === 'verify' && (
+          <div className={styles.viewPanel}>
+            <header className={styles.panelHeader}>
+              <h2>Identity Verification</h2>
+              <p>Verify your identity to unlock trust badges and premium features.</p>
+            </header>
+
+            {currentKycStatus === 'VERIFIED' ? (
+              <div className={styles.statusCardSuccess}>
+                <span className="material-symbols-outlined">check_circle</span>
                 <div>
-                  <h4>Identity verification (KYC)</h4>
-                  <p>Verify your identity to unlock additional features</p>
+                  <h4>Fully Verified</h4>
+                  <p>Your identity has been confirmed. You now have full access to all features.</p>
                 </div>
               </div>
-              <span className={styles.settingChevron}>›</span>
-            </div>
-          )}
-        </div>
-      </section>
+            ) : currentKycStatus === 'PENDING' ? (
+              <div className={styles.statusCardPending}>
+                <span className="material-symbols-outlined">hourglass_empty</span>
+                <div>
+                  <h4>Verification Pending</h4>
+                  <p>We're currently reviewing your details. This usually takes 24-48 hours.</p>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.verifyFlow}>
+                {!isNamesComplete && (
+                  <div className={styles.warningBox}>
+                    <span className="material-symbols-outlined">error</span>
+                    <p>Please complete your <b>First and Last Name</b> in the Personal Info tab before verifying.</p>
+                  </div>
+                )}
 
+                <div className={styles.methodToggle}>
+                  <button 
+                    className={vMethod === 'NIN' ? styles.toggleActive : ''} 
+                    onClick={() => setVMethod('NIN')}
+                  >NIN (Identity Number)</button>
+                  <button 
+                    className={vMethod === 'BVN' ? styles.toggleActive : ''} 
+                    onClick={() => setVMethod('BVN')}
+                  >BVN (Bank Verification)</button>
+                </div>
+
+                <div className={styles.inputGroupFull}>
+                  <label>{vMethod === 'NIN' ? '11-Digit NIN' : '11-Digit BVN'}</label>
+                  <input 
+                    type="password"
+                    value={vValue}
+                    onChange={e => setVValue(e.target.value.replace(/\D/g, '').slice(0, 11))}
+                    placeholder="Enter 11 digits"
+                    disabled={!isNamesComplete}
+                  />
+                  <small>Your security is our priority. This data is encrypted and discarded after verification.</small>
+                </div>
+
+                <button 
+                  className={styles.verifyBtn}
+                  disabled={!isNamesComplete || vValue.length < 11 || isVerifying}
+                  onClick={() => startKyc()}
+                >
+                  {isVerifying ? 'Verifying...' : 'Submit for Review'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'privacy' && (
+          <div className={styles.viewPanel}>
+            <header className={styles.panelHeader}>
+              <h2>Privacy & Safety</h2>
+              <p>Control your visibility and safety preferences.</p>
+            </header>
+
+            <div className={styles.settingCard}>
+              <div className={styles.settingText}>
+                <h4>Anonymous Mode</h4>
+                <p>When enabled, your pseudonym is hidden and replaced with "Anonymous" across public groups.</p>
+              </div>
+              <AnonToggle />
+            </div>
+
+            <div className={styles.settingCard}>
+              <div className={styles.settingText}>
+                <h4>Direct Messaging</h4>
+                <p>Allow specialists and members to reach out to you directly.</p>
+              </div>
+              <DMOption 
+                onChange={(enabled) => saveProfile({ ...form, dmOptIn: enabled } as any)} 
+              />
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 };
 
-/** Inline toggle for anonymous mode wired to the auth store */
 const AnonToggle: React.FC = () => {
   const { isAnonymousMode, toggleAnonymousMode } = useAuthStore();
   return (
     <button
       className={`${styles.toggle} ${isAnonymousMode ? styles.toggleOn : ''}`}
       onClick={() => toggleAnonymousMode(!isAnonymousMode)}
-      aria-pressed={isAnonymousMode}
     >
-      <span className={styles.toggleThumb} />
+      <div className={styles.toggleTrack}>
+        <div className={styles.toggleThumb} />
+      </div>
     </button>
   );
 };
+
+const DMOption: React.FC<{ onChange: (enabled: boolean) => void }> = ({ onChange }) => {
+  const { dmOptIn, toggleDmOptIn } = useAuthStore();
+  
+  const handleToggle = () => {
+    const newVal = !dmOptIn;
+    toggleDmOptIn(newVal);
+    onChange(newVal);
+  };
+
+  return (
+    <button className={`${styles.toggle} ${dmOptIn ? styles.toggleOn : ''}`} onClick={handleToggle}>
+       <div className={styles.toggleTrack}>
+        <div className={styles.toggleThumb} />
+      </div>
+    </button>
+  );
+}

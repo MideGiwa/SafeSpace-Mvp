@@ -25,7 +25,6 @@ import { SessionDetails } from './pages/SessionDetails/SessionDetails';
 import { SessionHistory } from './pages/SessionHistory/SessionHistory';
 import { ComingSoon } from './pages/ComingSoon/ComingSoon';
 import { Home } from './pages/Home/Home';
-import { Tokens } from './pages/Tokens/Tokens';
 import { Profile } from './pages/Profile/Profile';
 import { Toaster } from 'sonner';
 
@@ -51,11 +50,32 @@ function App() {
           <Routes>
             <Route path="/home" element={<Home />} />
             <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/community" element={<Community />} />
+            <Route 
+              path="/community" 
+              element={
+                <RoleGuard allowedRoles={['REGULAR', 'VERIFIED_PERSON', 'ADMIN']}>
+                  <Community />
+                </RoleGuard>
+              } 
+            />
             <Route path="/groups" element={<Groups />} />
             <Route path="/groups/:id" element={<GroupDetail />} />
-            <Route path="/directory" element={<Directory />} />
-            <Route path="/directory/:id" element={<ProfessionalProfile />} />
+            <Route 
+              path="/directory" 
+              element={
+                <RoleGuard allowedRoles={['REGULAR', 'VERIFIED_PERSON', 'ADMIN']}>
+                  <Directory />
+                </RoleGuard>
+              } 
+            />
+            <Route 
+              path="/directory/:id" 
+              element={
+                <RoleGuard allowedRoles={['REGULAR', 'VERIFIED_PERSON', 'ADMIN']}>
+                  <ProfessionalProfile />
+                </RoleGuard>
+              } 
+            />
             <Route path="/pro-dashboard" element={<ProfessionalDashboard />} />
             <Route 
               path="/kyc" 
@@ -87,7 +107,6 @@ function App() {
               }
             />
             <Route path="/inbox" element={<ComingSoon title="Inbox" />} />
-            <Route path="/tokens" element={<Tokens />} />
             <Route path="*" element={<Navigate to="/home" replace />} />
           </Routes>
         </AppShell>

@@ -1,4 +1,14 @@
-import { api } from './api';
+import axios from 'axios';
+
+const getBaseUrl = () => {
+  return import.meta.env.VITE_API_BASE_URL || '/api';
+};
+
+// Separate instance for auth-only calls to avoid interceptor recursion
+const authApi = axios.create({
+  baseURL: getBaseUrl(),
+  headers: { 'Content-Type': 'application/json' }
+});
 
 export interface User {
   id?: string;
@@ -22,21 +32,23 @@ export interface AuthResponse {
 
 export const authService = {
   login: async (credentials: any): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('auth/login', credentials);
+    const response = await authApi.post<AuthResponse>('auth/login', credentials);
     return response.data;
   },
 
   register: async (data: any): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('auth/register', data);
+    const response = await authApi.post<AuthResponse>('auth/register', data);
     return response.data;
   },
 
   refreshToken: async (refreshToken: string): Promise<string> => {
-    const response = await api.post<{ access_token: string }>('auth/refresh', { refreshToken });
+    // We use authApi here because we DON'T want the interceptor to add an expired access token
+    // or catch 401s from the refresh endpoint itself.
+    const response = await authApi.post<{ access_token: string }>('auth/refresh', { refreshToken });
     return response.data.access_token;
   },
 
   logout: async (refreshToken: string): Promise<void> => {
-    await api.post('auth/logout', { refreshToken }).catch(() => {});
+    await authApi.post('auth/logout', { refreshToken }).catch(() => {});
   },
 };

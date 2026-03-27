@@ -1,15 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { ProfessionalCard } from '../../features/directory/ProfessionalCard/ProfessionalCard';
-import { professionals } from '../../data/professionals';
+import { professionalService } from '../../services/professionalService';
 import styles from './Directory.module.css';
 
 export const Directory: React.FC = () => {
   const navigate = useNavigate();
+  const [activeSpecialty, setActiveSpecialty] = useState<string | undefined>();
+
+  const { data: pros = [], isLoading, isError } = useQuery({
+    queryKey: ['professionals', activeSpecialty],
+    queryFn: () => professionalService.getProfessionals(activeSpecialty === 'All Specialists' ? undefined : activeSpecialty),
+  });
 
   const handleBook = (id: string) => {
     navigate(`/directory/${id}`);
   };
+
+  const specialties = ['All Specialists', 'Anxiety', 'Depression', 'Trauma', 'Relationships'];
 
   return (
     <div className={styles.page}>
@@ -19,26 +28,38 @@ export const Directory: React.FC = () => {
       </header>
       
       <div className={styles.filters}>
-        <button className={`${styles.filterChip} ${styles.active}`}>All Specialists</button>
-        <button className={styles.filterChip}>Anxiety</button>
-        <button className={styles.filterChip}>Depression</button>
-        <button className={styles.filterChip}>Trauma</button>
-        <button className={styles.filterChip}>Relationships</button>
+        {specialties.map(s => (
+          <button 
+            key={s} 
+            className={`${styles.filterChip} ${activeSpecialty === s || (!activeSpecialty && s === 'All Specialists') ? styles.active : ''}`}
+            onClick={() => setActiveSpecialty(s)}
+          >
+            {s}
+          </button>
+        ))}
       </div>
 
       <div className={styles.grid}>
-        {professionals.map(pro => (
-          <ProfessionalCard
-            key={pro.id}
-            id={pro.id}
-            name={pro.name}
-            specialty={pro.specialty}
-            tags={pro.tags}
-            hourlyRate={pro.hourlyRate}
-            imageUrl={pro.imageUrl}
-            onBook={() => handleBook(pro.id)}
-          />
-        ))}
+        {isLoading ? (
+          [1, 2, 3].map(i => <div key={i} className={styles.skeletonCard} />)
+        ) : isError ? (
+          <p className={styles.error}>Unable to load professionals. Please try again later.</p>
+        ) : pros.length > 0 ? (
+          pros.map(pro => (
+            <ProfessionalCard
+              key={pro.id}
+              id={pro.userId} // Path uses userId
+              name={pro.user?.pseudonym || pro.specialty}
+              specialty={pro.specialty}
+              tags={[pro.specialty]}
+              hourlyRate={150} // Tokens constant for now
+              imageUrl={`https://api.dicebear.com/7.x/avataaars/svg?seed=${pro.userId}`}
+              onBook={() => handleBook(pro.userId)}
+            />
+          ))
+        ) : (
+          <p className={styles.empty}>No specialists found for this category.</p>
+        )}
       </div>
     </div>
   );

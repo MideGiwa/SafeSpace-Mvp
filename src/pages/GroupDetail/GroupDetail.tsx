@@ -21,7 +21,22 @@ export const GroupDetail: React.FC = () => {
     enabled: !!id && activeTab === 'sessions',
   });
 
-  if (loadingGroup) return <div className={styles.loading}>Connecting to sanctuary...</div>;
+  if (loadingGroup) {
+    return (
+      <div className={styles.page}>
+        <header className={styles.header}>
+          <div className={styles.skeleton} style={{ width: '3rem', height: '3rem', borderRadius: '50%' }} />
+          <div className={styles.headerInfo}>
+            <div className={styles.skeleton} style={{ width: '200px', height: '2.5rem', marginBottom: '0.5rem' }} />
+            <div className={styles.skeleton} style={{ width: '100px', height: '1.25rem' }} />
+          </div>
+        </header>
+        <div className={styles.skeleton} style={{ height: '3rem', marginBottom: '2rem' }} />
+        <div className={styles.skeleton} style={{ height: '300px', borderRadius: '1.5rem' }} />
+      </div>
+    );
+  }
+
   if (!group) return <div className={styles.error}>Sanctuary not found.</div>;
 
   return (
@@ -71,7 +86,10 @@ export const GroupDetail: React.FC = () => {
             </div>
             
             {loadingSessions ? (
-              <p>Loading sessions...</p>
+              <div className={styles.sessionsList}>
+                <div className={styles.skeleton} style={{ height: '80px', borderRadius: '1rem' }} />
+                <div className={styles.skeleton} style={{ height: '80px', borderRadius: '1rem' }} />
+              </div>
             ) : sessions.length > 0 ? (
               sessions.map(s => (
                 <div key={s.id} className={styles.sessionCard}>

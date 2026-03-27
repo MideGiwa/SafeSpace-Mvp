@@ -1,7 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { bookingService } from '../../services/bookingService';
+import { useAuthStore } from '../../stores/useAuthStore';
+import { professionalService } from '../../services/professionalService';
+import { toast } from 'sonner';
 import styles from './ProfessionalDashboard.module.css';
 
 export const ProfessionalDashboard: React.FC = () => {
+  const queryClient = useQueryClient();
+  const { user: storeUser } = useAuthStore();
+
+  const { data: bookings, isLoading } = useQuery({
+    queryKey: ['professionalBookings'],
+    queryFn: bookingService.getBookings
+  });
+
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ['myProfessionalProfile'],
+    queryFn: () => professionalService.getProfessionals().then(pros => pros.find(p => p.userId === storeUser?.id)),
+    enabled: !!storeUser?.id
+  });
+
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    bio: '',
+    specialty: '',
+    contactPreference: 'EMAIL'
+  });
+
+  const { mutate: updateProfile, isPending: isUpdating } = useMutation({
+    mutationFn: (data: any) => profile ? professionalService.updateProfile(data) : professionalService.submitProfile(data),
+    onSuccess: () => {
+      toast.success(profile ? 'Profile updated' : 'Profile submitted for verification');
+      setIsEditingProfile(false);
+      queryClient.invalidateQueries({ queryKey: ['myProfessionalProfile'] });
+    },
+    onError: (err: any) => {
+      toast.error('Failed to save profile', {
+        description: err.response?.data?.message || 'Something went wrong.'
+      });
+    }
+  });
+
+  const { mutate: acceptRequest } = useMutation({
+    mutationFn: (id: string) => bookingService.acceptBooking(id),
+    onSuccess: () => {
+      toast.success('Booking accepted');
+      queryClient.invalidateQueries({ queryKey: ['professionalBookings'] });
+    }
+  });
+
+  const { mutate: declineRequest } = useMutation({
+    mutationFn: (id: string) => bookingService.declineBooking(id),
+    onSuccess: () => {
+      toast.success('Booking declined');
+      queryClient.invalidateQueries({ queryKey: ['professionalBookings'] });
+    }
+  });
+
+  const incomingRequests = bookings?.filter(b => b.status === 'PENDING') || [];
+  const activeDiscussions = bookings?.filter(b => b.status === 'ACCEPTED') || [];
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -13,15 +72,7 @@ export const ProfessionalDashboard: React.FC = () => {
         </div>
         
         <div className={styles.headerStats}>
-          <div className={styles.earningsBlock}>
-            <p className={styles.earningsLabel}>Monthly Earnings</p>
-            <p className={styles.earningsAmount}>$12,480.00</p>
-          </div>
-          <img 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoIa1pg84TmV5UlRlC2S7_-XsTHjpLxKfdBEOMsfsXjeSsBpf7GIVFzeVM-Dz9QFEbgdR2o38fV1khF-WVeXMJSArT5ARQJqfsgRDDWMc7YLLD9KmVfu0pn-jUOLQkxiVL6RqfpXcm_Z_PohWOXG_vkTeenHSTynPW8k01pOC8tyPGCeN5ogNo2lk0aGrnLHD4hlmNmitPCYPVX2y-H2aGYpwX-XlGn_z-Y9LLCy_RcceCqC7i36GaWelbY2lvKwuseNrNJ7eqfZtE"
-            alt="Pro Avatar" 
-            className={styles.avatar} 
-          />
+          <div className={styles.avatarPlaceholder}>JD</div>
         </div>
       </header>
 
@@ -34,55 +85,47 @@ export const ProfessionalDashboard: React.FC = () => {
               <span className={styles.dotBlue}></span>
               <h3>Incoming</h3>
             </div>
-            <span className={styles.badge}>2</span>
+            <span className={styles.badge}>{incomingRequests.length}</span>
           </div>
 
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <div className={styles.clientInfo}>
-                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1wT-ZgBwWga8nVfdCi_2spDeQPHnp1avhuoAz70_zDYtp1D1JQobNP0XWfhgzq_wXs8MpZogyz29lnr_CwnSJVFsrImGTRewJHQPGg0OnMfAHew2uznE4GDuGHBGUhQI_ZvNtmBtrcBwJpGvoWrVtrkYJE5gXqs9y7Yq9bUTTH9IE-3NQG9k4LagNakjHl8mQpNo5N2OhESqP3OuGsmHAemd2sY_2yqn6y9YiaAAqKUX7HfKEAQZt7kojNTQxnigSJVp9vPT01xSC" alt="Client" />
-                <div>
-                  <h4>Elena Vance</h4>
-                  <p>Kindred Member since 2022</p>
+          {isLoading ? (
+            <div className={styles.loadingState}>Loading requests...</div>
+          ) : incomingRequests.length === 0 ? (
+            <div className={styles.emptyState}>No new requests</div>
+          ) : (
+            incomingRequests.map((request) => (
+              <div key={request.id} className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.clientInfo}>
+                    {request.clientAvatar ? (
+                      <img src={request.clientAvatar} alt={request.clientName} />
+                    ) : (
+                      <div className={styles.initialsAvatarSmall}>{request.clientName?.[0] || 'U'}</div>
+                    )}
+                    <div>
+                      <h4>{request.clientName || 'Anonymous Member'}</h4>
+                      <p>Requested on {new Date(request.proposedAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  {request.notes?.includes('Urgent') && <span className={styles.tagUrgent}>Urgent</span>}
+                </div>
+                <p className={styles.quote}>
+                  "{request.notes || 'No notes provided.'}"
+                </p>
+                <div className={styles.timeBlock}>
+                  <span className="material-symbols-outlined">schedule</span>
+                  <span>{new Date(request.proposedAt).toLocaleString()}</span>
+                </div>
+                <div className={styles.actionGrid}>
+                  <button className={styles.btnPrimary} onClick={() => acceptRequest(request.id)}>Accept</button>
+                  <button className={styles.btnSecondary}>Reschedule</button>
+                  <button className={styles.btnGhost} onClick={() => declineRequest(request.id!)}>
+                    <span className="material-symbols-outlined">close</span> Decline Request
+                  </button>
                 </div>
               </div>
-              <span className={styles.tagUrgent}>Urgent</span>
-            </div>
-            <p className={styles.quote}>
-              "Seeking a sanctuary to discuss career transitions and find balance in a high-stress role."
-            </p>
-            <div className={styles.timeBlock}>
-              <span className="material-symbols-outlined">schedule</span>
-              <span>Oct 24 • 2:00 PM (45m)</span>
-            </div>
-            <div className={styles.actionGrid}>
-              <button className={styles.btnPrimary}>Accept</button>
-              <button className={styles.btnSecondary}>Reschedule</button>
-              <button className={styles.btnGhost}>
-                <span className="material-symbols-outlined">close</span> Decline Request
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <div className={styles.clientInfo}>
-                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuApc-NsYMgiHuxfVGGHFEnxhVWk9B5czEAlvnwyRyYj7oWCuyOg7Vwu4YqyujB6mR-QJfEmGcgg9HkqZCofQfWGJMmtIMWlbnos_HnGPJt4XmbN6VVpzwZt-GpAmijlBFV6ycN1tI3_vsN_RVj7bZTVMGgAVPRkybtZe9jOWIiQx7ty1cRc7SQC67tFb304Y9SFE7W927FLI7hP7bR85dVYeHtQFdcmuW0dbChyUyicGswmNyO8IocuLgaEsj16euZHSHV9jehdIQjb" alt="Client" />
-                <div>
-                  <h4>Marcus Chen</h4>
-                  <p>New Referral</p>
-                </div>
-              </div>
-            </div>
-            <div className={styles.timeBlock}>
-              <span className="material-symbols-outlined">schedule</span>
-              <span>Oct 25 • 10:00 AM (60m)</span>
-            </div>
-            <div className={styles.actionGrid2}>
-              <button className={styles.btnPrimary}>Accept</button>
-              <button className={styles.btnSecondary}>Reschedule</button>
-            </div>
-          </div>
+            ))
+          )}
         </div>
 
         {/* Column 2: Active Discussions */}
@@ -92,124 +135,115 @@ export const ProfessionalDashboard: React.FC = () => {
               <span className={styles.dotPurple}></span>
               <h3>Active Discussions</h3>
             </div>
-            <span className={styles.badge}>2</span>
+            <span className={styles.badge}>{activeDiscussions.length}</span>
           </div>
 
           <div className={styles.activeContainer}>
-            <div className={styles.activeCallCard}>
-              <div className={styles.activeCallHeader}>
-                <div>
-                  <h4>Weekly Alignment</h4>
-                  <p>With Sarah Jenkins</p>
+            {activeDiscussions.length === 0 ? (
+              <div className={styles.emptyState}>No active sessions</div>
+            ) : (
+              activeDiscussions.map((session) => (
+                <div key={session.id} className={styles.activeCallCard}>
+                  <div className={styles.activeCallHeader}>
+                    <div>
+                      <h4>Session in Session</h4>
+                      <p>With {session.clientName}</p>
+                    </div>
+                    <div className={styles.videoIcon}>
+                      <span className="material-symbols-outlined">videocam</span>
+                    </div>
+                  </div>
+                  <div className={styles.activeCallMeta}>
+                    <div className={styles.avatarStack}>
+                      {session.clientAvatar && <img src={session.clientAvatar} alt="Client" />}
+                      <div className={styles.initialAvatar}>{session.clientName?.[0] || 'U'}</div>
+                    </div>
+                    <span className={styles.startingSoon}>Started</span>
+                  </div>
+                  <button className={styles.btnEnter} onClick={() => window.location.href = '/call'}>Enter Harbor</button>
                 </div>
-                <div className={styles.videoIcon}>
-                  <span className="material-symbols-outlined">videocam</span>
-                </div>
-              </div>
-              <div className={styles.activeCallMeta}>
-                <div className={styles.avatarStack}>
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBki9-uDuJvYESxZmdDNl6HmamLXzu5MAOdfkQvfoqF5Ao-kcwNCeuamuIItIPZDJ-YFa_Hius_olQX5_bfmrEc_gXiqtY8vX0jyB9ALplfp4MOh0WRTE8Az0n8uWvN39Mpbtlq1Nl16czavhK0Rxn5Yii3KKyJMKj_9x-e2V9nDGG-NiUtHL7ABTcIJwIi_p3Qv39388d70ZvZhpsNct4WvgFYgUYoCBPGsFQa3YkCt-zyEREBQNRM_LLAR4P5jkYO4iJIAQ9cuOIM" alt="Sarah" />
-                  <div className={styles.initialAvatar}>KH</div>
-                </div>
-                <span className={styles.startingSoon}>Starting in 15m</span>
-              </div>
-              <button className={styles.btnEnter}>Enter Harbor</button>
-            </div>
-
-            <div className={styles.pendingCard}>
-              <h5 className={styles.pendingTitle}>Pending Preparation</h5>
-              <div className={styles.pendingItem}>
-                <div className={styles.pendingIcon}>
-                  <span className="material-symbols-outlined">description</span>
-                </div>
-                <div>
-                  <p className={styles.pendingName}>Initial Intake Form</p>
-                  <p className={styles.pendingSub}>David Miller • Not started</p>
-                </div>
-              </div>
-            </div>
+              ))
+            )}
           </div>
         </div>
 
-        {/* Column 3: Analytics */}
+        {/* Column 3: Profile Management */}
         <div className={styles.column}>
-          
-          <div className={styles.analyticsCard}>
-            <div className={styles.analyticsGlow}></div>
-            <h3 className={styles.analyticsTitle}>Earnings Analytics</h3>
-            
-            <div className={styles.progressSection}>
-              <div className={styles.progressHeader}>
-                <span>Monthly Target</span>
-                <span>$15,000</span>
-              </div>
-              <div className={styles.progressBarBg}>
-                <div className={styles.progressBarFill} style={{ width: '84%' }}></div>
-              </div>
+          <div className={styles.profileCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>Professional Profile</h3>
+              {!isEditingProfile && (
+                <button className={styles.editBtn} onClick={() => {
+                  setProfileForm({
+                    bio: profile?.bio || '',
+                    specialty: profile?.specialty || '',
+                    contactPreference: profile?.contactPreference || 'EMAIL'
+                  });
+                  setIsEditingProfile(true);
+                }}>
+                  <span className="material-symbols-outlined">edit</span>
+                </button>
+              )}
             </div>
 
-            <div className={styles.statsGrid}>
-              <div>
-                <p className={styles.statLabel}>Sessions</p>
-                <p className={styles.statValue}>142</p>
+            {isLoadingProfile ? (
+              <p>Loading profile...</p>
+            ) : isEditingProfile ? (
+              <div className={styles.profileForm}>
+                <div className={styles.field}>
+                  <label>Specialty</label>
+                  <input 
+                    value={profileForm.specialty}
+                    onChange={e => setProfileForm(f => ({ ...f, specialty: e.target.value }))}
+                    placeholder="e.g. Clinical Psychologist"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label>Professional Bio</label>
+                  <textarea 
+                    value={profileForm.bio}
+                    onChange={e => setProfileForm(f => ({ ...f, bio: e.target.value }))}
+                    placeholder="Tell members about your approach..."
+                  />
+                </div>
+                <div className={styles.formActions}>
+                  <button className={styles.btnGhost} onClick={() => setIsEditingProfile(false)}>Cancel</button>
+                  <button 
+                    className={styles.btnPrimary} 
+                    onClick={() => updateProfile(profileForm)}
+                    disabled={isUpdating}
+                  >
+                    {isUpdating ? 'Saving...' : (profile ? 'Update Profile' : 'Submit Profile')}
+                  </button>
+                </div>
               </div>
-              <div>
-                <p className={styles.statLabel}>Avg Rate</p>
-                <p className={styles.statValue}>$185</p>
+            ) : profile ? (
+              <div className={styles.profileDisplay}>
+                <div className={styles.statusBadge}>
+                  <span className="material-symbols-outlined">verified</span>
+                  {profile.isVerified ? 'Verified Professional' : 'Verification Pending'}
+                </div>
+                <div className={styles.proMeta}>
+                  <p className={styles.proSpecialty}>{profile.specialty}</p>
+                  <p className={styles.proBio}>{profile.bio}</p>
+                </div>
+                <button 
+                  className={styles.viewPublicBtn}
+                  onClick={() => window.location.href = `/directory/${storeUser?.id}`}
+                >
+                  View Public Profile
+                </button>
               </div>
-            </div>
-
-            <div className={styles.taxBtn}>
-              <span>Download Tax Report</span>
-              <span className="material-symbols-outlined">download</span>
-            </div>
-          </div>
-
-          <div className={styles.historyCard}>
-            <h3>Recent History</h3>
-            
-            <div className={styles.historyList}>
-              <div className={styles.historyItem}>
-                <div className={styles.historyIconGood}>
-                  <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
-                </div>
-                <div className={styles.historyText}>
-                  <p>Deep Dive Session</p>
-                  <span>Completed • Oct 22</span>
-                </div>
-                <span className={styles.historyAmtGood}>+$210</span>
+            ) : (
+              <div className={styles.emptyProfile}>
+                <span className="material-symbols-outlined" style={{fontSize: '3rem', opacity: 0.3}}>account_box</span>
+                <p>You haven't set up your professional profile yet.</p>
+                <button className={styles.btnPrimary} onClick={() => setIsEditingProfile(true)}>Create Profile</button>
               </div>
-              
-              <div className={styles.historyItem}>
-                <div className={styles.historyIconGood}>
-                  <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
-                </div>
-                <div className={styles.historyText}>
-                  <p>Group Workshop</p>
-                  <span>Completed • Oct 21</span>
-                </div>
-                <span className={styles.historyAmtGood}>+$450</span>
-              </div>
-
-              <div className={styles.historyItem}>
-                <div className={styles.historyIconBad}>
-                  <span className="material-symbols-outlined">cancel</span>
-                </div>
-                <div className={styles.historyText}>
-                  <p>Cancelled Session</p>
-                  <span>Nina Sky • Oct 20</span>
-                </div>
-                <span className={styles.historyAmtBad}>$0</span>
-              </div>
-            </div>
-
-            <button className={styles.btnLedger}>
-              View Full Ledger <span className="material-symbols-outlined">arrow_forward</span>
-            </button>
+            )}
           </div>
 
         </div>
-
       </section>
     </div>
   );

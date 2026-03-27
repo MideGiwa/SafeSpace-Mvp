@@ -33,27 +33,32 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Avoid infinite loops if refreshing fails
-    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/refresh') {
+    // Avoid infinite loops: if the request itself was a refresh attempt, just logout
+    const isRefreshRequest = originalRequest.url?.includes('/auth/refresh');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshRequest) {
       originalRequest._retry = true;
+      
       try {
         const { refreshToken, logout, setTokens } = useAuthStore.getState();
+        
         if (!refreshToken) {
           logout();
           return Promise.reject(error);
         }
 
+        // Refresh the token (this call now bypasses this interceptor)
         const newAccessToken = await authService.refreshToken(refreshToken);
         
-        // Update store with new token (will also update the request interceptor implicitly)
+        // Update store
         setTokens(newAccessToken, refreshToken);
         
-        // Update header for this specific retry
+        // Retry the original request with the new token
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        
         return api(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, log the user out
+        // If refresh fails (e.g., refresh token expired), force logout
+        console.error('Session expired. Logging out.');
         useAuthStore.getState().logout();
         return Promise.reject(refreshError);
       }

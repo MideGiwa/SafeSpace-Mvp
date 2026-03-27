@@ -43,6 +43,7 @@
   
   /* Error */
   --error: #ba1a1a;
+  --error-rgb: 186, 26, 26;
   --on-error: #ffffff;
   
   /* Typography */

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../../utils/currency';
 import { tokenTransactions } from '../../data/tokens';
+import { useAuthStore } from '../../stores/useAuthStore';
 import styles from './Tokens.module.css';
 
 const packages = [
@@ -10,8 +11,95 @@ const packages = [
 ];
 
 export const Tokens: React.FC = () => {
+  const { user } = useAuthStore();
+  const isProfessional = user?.role === 'PROFESSIONAL';
   const [tab, setTab] = useState<'history' | 'fund'>('history');
   const [selected, setSelected] = useState(1);
+
+  if (isProfessional) {
+    return (
+      <div className={styles.page}>
+        <header className={styles.earningsHeader}>
+          <div>
+            <h1 className={styles.title}>Professional Wallet</h1>
+            <p className={styles.subtitle}>Manage your clinical earnings and payout requests.</p>
+          </div>
+        </header>
+
+        {/* Earnings Hero */}
+        <div className={styles.earningsCard}>
+          <div className={styles.earningsMain}>
+            <p className={styles.balanceLabel}>Lifetime Revenue</p>
+            <div className={styles.earningsValue}>{formatCurrency(12480450)}</div>
+            <p className={styles.balanceNote}>Updated 14 mins ago</p>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className={styles.earningsGrid}>
+          <div className={styles.statCard}>
+            <h4>Pending Payout</h4>
+            <div className={styles.statValue}>{formatCurrency(120500)}</div>
+          </div>
+          <div className={styles.statCard}>
+            <h4>Settled This Month</h4>
+            <div className={styles.statValue}>{formatCurrency(2450000)}</div>
+          </div>
+        </div>
+
+        {/* Payout Action */}
+        <div className={styles.payoutSection}>
+          <div className={styles.payoutInfo}>
+            <h3>Ready for payout?</h3>
+            <p>Withdraw your earnings to your verified bank account.</p>
+          </div>
+          <button className={styles.payoutBtn}>Request Payout</button>
+        </div>
+
+        {/* Analytics Section */}
+        <div className={styles.analyticsBox}>
+          <div className={styles.analyticsHeader}>
+            <h3>Monthly Goal Progress</h3>
+            <span style={{ color: 'var(--primary)', fontWeight: 700 }}>84%</span>
+          </div>
+          <div className={styles.progressBar}>
+            <div className={styles.progressFill} style={{ width: '84%' }}></div>
+          </div>
+          <div className={styles.progressLabels}>
+            <span>₦2.4M earned</span>
+            <span>Target: ₦3M</span>
+          </div>
+        </div>
+
+        {/* History Preview */}
+        <div style={{ marginTop: '4rem' }}>
+          <h3 style={{ marginBottom: '1.5rem', fontWeight: 800 }}>Revenue History</h3>
+          <div className={styles.transactionList}>
+            {[
+              { id: 1, label: 'Session Payout - Client #42', date: 'Oct 24, 2024', amount: '+ ₦12,000', type: 'credit' },
+              { id: 2, label: 'Group Session Payout - "Anxiety 101"', date: 'Oct 22, 2024', amount: '+ ₦45,000', type: 'credit' },
+              { id: 3, label: 'Platform Commission (10%)', date: 'Oct 22, 2024', amount: '- ₦4,500', type: 'debit' },
+            ].map(tx => (
+              <div key={tx.id} className={styles.txRow}>
+                <div className={`${styles.txIcon} ${tx.type === 'credit' ? styles.txIconCredit : styles.txIconDebit}`}>
+                  <span className="material-symbols-outlined">
+                    {tx.type === 'credit' ? 'trending_up' : 'trending_down'}
+                  </span>
+                </div>
+                <div className={styles.txInfo}>
+                  <p className={styles.txLabel}>{tx.label}</p>
+                  <p className={styles.txDate}>{tx.date}</p>
+                </div>
+                <div className={`${styles.txAmount} ${tx.type === 'credit' ? styles.credit : styles.debit}`}>
+                  {tx.amount}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>

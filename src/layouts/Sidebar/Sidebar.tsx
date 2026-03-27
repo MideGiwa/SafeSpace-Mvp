@@ -1,17 +1,33 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button/Button';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { authService } from '../../services/authService';
 import styles from './Sidebar.module.css';
 
 export const Sidebar: React.FC = () => {
-  const { user } = useAuthStore();
+  const { user, refreshToken, logout } = useAuthStore();
+  const navigate = useNavigate();
   
   const initials = user 
     ? (user.firstName?.[0] || '') + (user.lastName?.[0] || '')
     : '';
   
   const displayName = user?.pseudonym || user?.firstName || 'Member';
+  const isProfessional = user?.role === 'PROFESSIONAL';
+
+  const handleLogout = async () => {
+    if (window.confirm('Are you sure you want to log out?')) {
+      // 1. Call backend to invalidate refresh token (optional but good practice)
+      if (refreshToken) {
+        await authService.logout(refreshToken);
+      }
+      // 2. Clear local state
+      logout();
+      // 3. Redirect
+      navigate('/auth');
+    }
+  };
 
   return (
     <aside className={styles.sidebar}>
@@ -40,32 +56,48 @@ export const Sidebar: React.FC = () => {
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>home</span>
           <span className={styles.navLabel}>Home</span>
         </NavLink>
-        <NavLink to="/community" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
-          <span className={styles.navLabel}>Community</span>
-        </NavLink>
+        
+        {!isProfessional && (
+          <NavLink to="/community" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
+            <span className={styles.navLabel}>Community</span>
+          </NavLink>
+        )}
+
         <NavLink to="/groups" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>hub</span>
           <span className={styles.navLabel}>Groups</span>
         </NavLink>
+
         <NavLink to="/sessions" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>settings_voice</span>
           <span className={styles.navLabel}>Sessions</span>
         </NavLink>
-        <NavLink to="/directory" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>medical_services</span>
-          <span className={styles.navLabel}>Professionals</span>
-        </NavLink>
-        <NavLink to="/tokens" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>toll</span>
-          <span className={styles.navLabel}>Tokens</span>
-        </NavLink>
+
+        {!isProfessional && (
+          <NavLink to="/directory" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>medical_services</span>
+            <span className={styles.navLabel}>Professionals</span>
+          </NavLink>
+        )}
+
       </nav>
 
       <div className={styles.bottomSection}>
-        <Button variant="primary" fullWidth className={styles.bookBtn}>
-          Book Session
-        </Button>
+        {!isProfessional && (
+          <Button 
+            variant="primary" 
+            fullWidth 
+            className={styles.bookBtn}
+            onClick={() => navigate('/directory')}
+          >
+            Book Session
+          </Button>
+        )}
+        <button className={styles.logoutBtn} onClick={handleLogout}>
+          <span className="material-symbols-outlined">logout</span>
+          Logout
+        </button>
       </div>
     </aside>
   );
